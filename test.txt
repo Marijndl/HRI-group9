@@ -1,2 +1,1 @@
-Hi! Test. add some text here
-
+Hi! Test.
