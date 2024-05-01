@@ -12,10 +12,11 @@ import sprite_routines as sp
 import my_navigation_code as nav
 
 
+
 def create_world(background):
 
     nao1 = sp.nao_robot(background)
-    nao1.set_pos(10, 10, 0)
+    nao1.set_pos(5, 5, 0)
     target1 = sp.target(50, 20)
     wall1 = sp.obstacle(10.5, 20, 1, 21, 0)
     wall2 = sp.obstacle(5, 10, 10, 1, 0)
@@ -26,8 +27,9 @@ def create_world(background):
     polygon1.set_pos(40, 10, 0)  # cm
     # allsprites = pygame.sprite.Group((target1,nao1))
     alltargets = sp.pygame.sprite.Group((target1,))
-    # allobstacles = sp.pygame.sprite.Group((wall1, wall2, wall3, wall4))
-    allobstacles = sp.pygame.sprite.Group(())
+    allobstacles = sp.pygame.sprite.Group((wall1, wall2, wall3, wall4))
+
+    # allobstacles = sp.pygame.sprite.Group(())
     allrobots = sp.pygame.sprite.Group((nao1,))
 
     whiff_sound = sp.load_sound('whiff.wav')
@@ -102,7 +104,7 @@ def mainloop():
 
     nao1 = allrobots.sprites()[0]  # there is only one robot currently
     target = alltargets.sprites()[0] # and one target
-
+    autonomous = True
     while going:
         clock.tick(60)
         # Handle Input Events
@@ -155,6 +157,7 @@ def mainloop():
         # this updates the parameters and the state of the robot (collided or not, going or not
         if autonomous:
             nav.scan_world(nao1, allobstacles, alltargets)
+
         if collision_detection:
             collided = detect_collisions(nao1, allobstacles, allsounds, collided)
         if not target_reached:
