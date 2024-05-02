@@ -1,6 +1,6 @@
 import math
 import numpy as np
-import behaviour_based_navigation as bn
+import behaviour_based_navigation_ex2 as bn2
 from definitions import *
 
 
@@ -26,8 +26,8 @@ def scan_world(robot, allobstacles, alltargets):
 
 
 
-    turn_rate = bn.compute_turnrate(target_distance, target_angle_robot, sonar_left, sonar_right, robot.phi, target_angle)
-    velocity = bn.compute_velocity(target_distance, target_angle_robot, sonar_left, sonar_right)
+    turn_rate = bn2.compute_turnrate(target_distance, target_angle_robot, sonar_left, sonar_right, robot.phi, target_angle)
+    velocity = bn2.compute_velocity(target_distance, target_angle_robot, sonar_left, sonar_right)
 
     ### Old code
 
