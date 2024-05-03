@@ -26,37 +26,37 @@ def FStochastic():
     Fstoch =Kstoch*random.randint(1,100)/100.0
     return Fstoch
 
-def FOrienting(target_angle):
-    if target_angle < 0:
-        Forient = math.pi + target_angle
-    elif target_angle > 0:
-        Forient =  target_angle - math.pi
-    else:
-        Forient = 0 
+def FOrienting(target_angle, target_distance, robot_poss):
+    Forient = 0
+    if target_distance <= 10:
+        if target_angle < 0:
+            Forient = math.pi + target_angle
+        elif target_angle > 0:
+            Forient =  target_angle - math.pi
+        else:
+            Forient = 0
+    
+    # Flip robot if near end of map
+    if robot_poss.x < 3 or robot_poss.x > 63 or robot_poss.y < 3 or robot_poss.y > 33:
+        Forient += math.pi
+    
     return Forient
 
-def compute_velocity(target_distance, target_angle_robot, sonar_distance_left, sonar_distance_right):
+def compute_velocity(target_distance, target_angle_robot, sonar_distance_left, sonar_distance_right, explore_distance, explore_point):
     max_velocity = 1.0
     max_distance = 0.5 #m
-    min_distance = 0.2 #m
+    min_distance = 3 #m
 
-    if sonar_distance_left>max_distance and sonar_distance_right > max_distance:
-        velocity = max_velocity
-    elif sonar_distance_left<min_distance or sonar_distance_right < min_distance:
-        velocity = 0.0
-    elif sonar_distance_left<sonar_distance_right:
-        velocity = max_velocity*sonar_distance_left/max_distance
-    else:
-        velocity = max_velocity*sonar_distance_right/max_distance
+    
 
     if target_distance > min_distance:
         velocity = (1 / target_distance) * max_velocity * 30
     else:
-        velocity = (1 / min_distance) * max_velocity * 30
+        velocity = (1 / min_distance) * max_velocity * 100
 
-    return velocity
+    return velocity, explore_point
 
-def compute_turnrate(target_dist, target_angle, sonar_distance_left, sonar_distance_right):
+def compute_turnrate(target_dist, target_angle, sonar_distance_left, sonar_distance_right, explore_angle_robot, robot_poss):
     max_turnrate = 0.349 #rad/s # may need adjustment!
 
     delta_t = 1 # may need adjustment!
@@ -69,7 +69,7 @@ def compute_turnrate(target_dist, target_angle, sonar_distance_left, sonar_dista
     FTotal = FTarget(target_dist, target_angle) + \
              Fobs_left + \
              Fobs_right + \
-             FOrienting(target_angle) + \
+             FOrienting(target_angle, target_dist, robot_poss) + \
              FStochastic()
              
     # turnrate: d phi(t) / dt = sum( forces ) 

@@ -31,7 +31,7 @@ def FOrienting(target_angle):
     Forient=target_angle 
     return Forient
 
-def compute_velocity(target_dist, target_angle, sonar_distance_left, sonar_distance_right):
+def compute_velocity(target_distance, target_angle_robot, sonar_distance_left, sonar_distance_right, explore_distance, explore_point):
     max_velocity = 1.0
     max_distance = 0.5 #m
     min_distance = 0.2 #m
@@ -45,14 +45,14 @@ def compute_velocity(target_dist, target_angle, sonar_distance_left, sonar_dista
     else:
         velocity = max_velocity*sonar_distance_right/max_distance
 
-    if target_dist > min_distance:
-        velocity = (1 / target_dist) * max_velocity * 50
+    if target_distance > min_distance:
+        velocity = (1 / target_distance) * max_velocity * 50
     else:
         velocity = (1 / min_distance) * max_velocity * 50
 
-    return velocity
+    return velocity, explore_point
 
-def compute_turnrate(target_dist, target_angle, sonar_distance_left, sonar_distance_right):
+def compute_turnrate(target_dist, target_angle, sonar_distance_left, sonar_distance_right, explore_angle_robot, robot_poss):
     max_turnrate = 0.349 #rad/s # may need adjustment!
 
     delta_t = 1 # may need adjustment!
