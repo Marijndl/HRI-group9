@@ -92,8 +92,6 @@ def mainloop():
        a loop until the function returns."""
     screen, background, clock = sp.init()
     allrobots, allobstacles, alltargets, allsounds  = create_world(background)
-
-    scanner = nav.scanner()
     
     # Main Loop
     going = True
@@ -156,7 +154,7 @@ def mainloop():
 
         # this updates the parameters and the state of the robot (collided or not, going or not
         if autonomous:
-            scanner.scan_world(nao1, allobstacles, alltargets)
+            nav.scan_world(nao1, allobstacles, alltargets)
         if collision_detection:
             collided = detect_collisions(nao1, allobstacles, allsounds, collided)
         if not target_reached:
