@@ -1,6 +1,6 @@
 import math
 import numpy as np
-import behaviour_based_navigation_aggresive as bn
+import behaviour_based_navigation_coward as bn
 from definitions import *
 import random
 

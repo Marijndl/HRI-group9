@@ -38,7 +38,7 @@ def FOrienting(target_angle, target_distance, robot_poss):
             Forient = 0
     
     # Flip robot if near end of map
-    if robot_poss.x < 8 or robot_poss.x > 60 or robot_poss.y < 8 or robot_poss.y > 30:
+    if robot_poss.x < 8 or robot_poss.x > 58 or robot_poss.y < 8 or robot_poss.y > 30:
         Forient += math.pi
     
     return Forient
@@ -60,7 +60,7 @@ def compute_velocity(target_distance, target_angle_robot, sonar_distance_left, s
     if target_distance <= explore_distance_range:
         return 2 * target_distance * max_velocity * 0.1
     else:
-        return 2 * explore_distance_range * max_velocity  * 0.1 + target_distance * 0.1
+        return 3 * explore_distance_range * max_velocity  * 0.1
     
 def compute_turnrate(target_dist, target_angle, sonar_distance_left, sonar_distance_right, robot_poss):
     max_turnrate = 0.349 #rad/s # may need adjustment!
