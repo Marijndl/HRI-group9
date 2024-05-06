@@ -5,7 +5,7 @@ def kalman_filter(mu, sigma, sonar_left, sonar_right, v):
     states = mu.shape[0]
 
     z = np.array([[sonar_left], [sonar_right]])  # New measurement
-    Q = np.array([[np.random.normal(scale=0.1), 0], [0, np.random.normal(scale=0.1)]])  # Measurement noise
+    Q = np.array([[np.random.normal(scale=0.01), 0], [0, np.random.normal(scale=0.01)]])  # Measurement noise
     C = np.identity(states)  # Measurement matrix
 
     # Update parameters using measurement:
@@ -14,9 +14,9 @@ def kalman_filter(mu, sigma, sonar_left, sonar_right, v):
     sigma = (np.identity(states) - K * C) * sigma
 
     A = np.identity(states)
-    R = np.array([[np.random.normal(scale=0.1), 0], [0, np.random.normal(scale=0.1)]])  # Motion noise
+    R = np.array([[np.random.normal(scale=0.01), 0], [0, np.random.normal(scale=0.01)]])  # Motion noise
     u = np.array([[v], [v]])
-    dt = 1
+    dt = 0.05
     B = np.array([[-1 * dt / (0.5 * np.sqrt(3)), 0], [0, -1 * dt / (0.5 * np.sqrt(3))]])
 
     # Update parameters with motion model:

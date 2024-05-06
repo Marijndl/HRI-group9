@@ -22,6 +22,8 @@ class scanner():
     def __init__(self, start_L, start_R):
         self.mu = np.array([[start_L], [start_R]])
         self.sigma = np.array([[0.1, 0],[0, 0.1]])
+        print("Initial")
+        print(self.mu, self.sigma)
         
     def scan_world(self, robot, allobstacles, alltargets):
         [sonar_left, sonar_right] = robot.sonar(allobstacles)
@@ -35,6 +37,6 @@ class scanner():
         self.mu = mu
         self.sigma = sigma
         print(mu, sigma)
-        
+
         robot.set_vel(velocity, turn_rate) # the simulated robot does not sidestep
 

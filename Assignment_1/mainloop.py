@@ -103,7 +103,7 @@ def mainloop():
 
     nao1 = allrobots.sprites()[0]  # there is only one robot currently
     target = alltargets.sprites()[0] # and one target
-    scanner = nav.scanner((nao1.x - 20-2.5)/ (0.5*np.sqrt(3)), (nao1.x - 20-2.5) / (0.5*np.sqrt(3)))
+    scanner = nav.scanner((20-2.5 - nao1.x)/ (0.5*np.sqrt(3)), (20-2.5 - nao1.x) / (0.5*np.sqrt(3)))
 
     while going:
         clock.tick(60)
