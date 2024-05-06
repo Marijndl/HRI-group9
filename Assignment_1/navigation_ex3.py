@@ -1,7 +1,7 @@
 import math
 import numpy as np
 import behaviour_based_navigation_ex2 as bn2
-from definitions import *
+import random
 
 import nao_nocv_2_1 as nao
 import time
@@ -19,34 +19,114 @@ nao.InitPose()
 nao.InitSonar(True)
 nao.InitLandMark()
 
+sizeX_limits = {"min":[0.22,0.5], "max":[0.45,2.5]}
 
-def get_target_angle():
+def print_landmark_debug():
     detected, timestamp, markerInfo=nao.DetectLandMark()
-    #bug in nao_nocv_2_1.py -> markerID is [1][0] instead of [0][0] (to fix? ask prof)
-    return markerInfo[0][1] #x angle from robot's perspective - is this what `target_angle` means?
+    print(detected,markerInfo)
 
-initial_yaw = 2
-nao.MoveHead(yaw_val=initial_yaw, pitch_val=0, isAbsolute=True, timeLists=[[1],[1]])
-   
-def find_target(detected,n):
-    if not detected:
-        nao.MoveHead(yaw_val=n, pitch_val=0, isAbsolute=True, timeLists=[[1],[1]])
+
+
+
+def look_on_spot():
+    found_bool, xvalue, sizeX = lookltr()
+    if found_bool == False: #if not in view, turn around and try again
+        nao.Walk(0.,0.,180)
+        found_bool, xvalue, sizeX = lookltr()
+    return found_bool, xvalue, sizeX
+
+def lookltr():
+    yaw_start = 2
+    yaw_counter = yaw_start
+    yaw_rate = 0.2
+    found_bool = False
+    while (found_bool == False) or (yaw_counter<=(yaw_start - yaw_rate)):
+        #TODO: every 0.5 seconds
+        nao.MoveHead(yaw_val=yaw_counter)
+        found_bool, target_x_location, sizeX = is_target_found()
+
+        yaw_counter = yaw_counter - yaw_rate
+    return found_bool, target_x_location, sizeX
+
+
+def is_target_found():
+    detected, _, markerInfo = nao.DetectLandMark()
+    if detected:
+        return detected, markerInfo[0][1], markerInfo[0][3]
+    return detected, 0, 0
+
+
+def walk_to_target(target_x_location, sizeX, toggle=True):
+    """
+    walk to target by aligning, calculating distance, and walking said distance forward
+
+    toggle parameter for use in loops - can stop robot if `False`
+    """
+    if toggle:
+        safety_margin = 0.15
+        #align with target
+        nao.Walk(0.,0.,target_x_location) #how to convert target_x_location to angles?
+
+        target_distance = get_target_distance(sizeX)
+        nao.Walk(target_distance - safety_margin, 0.,0.)
     else:
-        pass
-    yaw=nao.GetYaw()
-
-
-def looking(detected):
-    initial_yaw = 2
-    new_yaw = initial_yaw
-    while detected==False:
-        nao.MoveHead(yaw_val=new_yaw, pitch_val=0, isAbsolute=True, timeLists=[[1],[1]])
-        new_yaw = new_yaw-0.5
-
-        if new_yaw <= -1.5:
-            print("not found!!!")
-            break 
+        nao.Move(0.0,0.0,0.0)
     
+
+def get_target_distance(sizeX):
+   
+    global sizeX_limits
+    size_min, dist_min = sizeX_limits["min"]
+    size_max, dist_max = sizeX_limits["max"]
+
+    return dist_min + (dist_max - dist_min) * (sizeX - size_min) / (size_max - size_min)
+
+
+def change_location_random():
+    x,y,theta = get_random_walk()
+    nao.Walk(0.,0.,theta)
+    nao.Walk(x,y,0.)
+
+def get_random_walk():
+    x = random.randrange(10) / 20 #get values from 0 to 0.95
+    y = random.randrange(10) / 20
+    theta = random.randrange(360)
+    return x,y, theta
+
+def avoid_obstacle(SL,SR, min_distance):
+    if SL<SR:
+        if SL<min_distance:
+            nao.Walk(0.,-min_distance,0.)
+    elif SL>SR:
+        if SR<min_distance:
+            nao.Walk(0.,min_distance,0.)
+    #else walk either straight backwards or to a random diagonal backwards
+
+def is_obstacle_close(SL,SR, min_distance):
+    if SL<min_distance or SR<min_distance:
+        return True
+    return False
+
+
+
+
+
+#TODO: finish impelemting 
+
+# finding target
+found_bool = False
+while found_bool == False:
+    found_bool, target_x_location, sizeX = look_on_spot()
+    change_location_random()
+
+walk__bool = True
+while walk__bool == True:
+    if not is_obstacle_close:
+        walk_to_target(target_x_location, sizeX)
+    else:
+        walk_to_target(target_x_location, sizeX, is_obstacle_close)
+        avoid_obstacle()
+
 
 
 last_execution_10 = None
@@ -70,7 +150,7 @@ while start_time < timeout_time:
         print(detected,markerInfo)
 
 
-        #TODO: implement navigation to target (ask prof: have to use ex2 functions? desc. is confusing)
+        #TODO: implement navigation to target 
         #TODO: implement obstacle avoidance
 
     #this will execute at a rate of 0.25Hz
