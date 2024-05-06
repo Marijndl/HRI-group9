@@ -10,6 +10,7 @@ follow along in the tutorial.
 from definitions import *
 import sprite_routines as sp
 import my_navigation_code as nav
+import numpy as np
 
 
 def create_world(background):
@@ -19,15 +20,15 @@ def create_world(background):
     target1 = sp.target(50, 20)
     wall1 = sp.obstacle(10.5, 20, 1, 21, 0)
     wall2 = sp.obstacle(5, 10, 10, 1, 0)
-    wall3 = sp.obstacle(30, 10, 15, 15)
+    wall3 = sp.obstacle(20, 10, 5, 100)
     wall4 = sp.obstacle(30, 30, 15, 2)
 
     polygon1 = sp.polygon([[0, 0], [200, 0], [300, 300], [100, 400], [-100, 300]], (250, 250, 0))  # px
     polygon1.set_pos(40, 10, 0)  # cm
     # allsprites = pygame.sprite.Group((target1,nao1))
     alltargets = sp.pygame.sprite.Group((target1,))
-    # allobstacles = sp.pygame.sprite.Group((wall1, wall2, wall3, wall4))
-    allobstacles = sp.pygame.sprite.Group(())
+    allobstacles = sp.pygame.sprite.Group((wall3))
+    # allobstacles = sp.pygame.sprite.Group(())
     allrobots = sp.pygame.sprite.Group((nao1,))
 
     whiff_sound = sp.load_sound('whiff.wav')
@@ -102,6 +103,7 @@ def mainloop():
 
     nao1 = allrobots.sprites()[0]  # there is only one robot currently
     target = alltargets.sprites()[0] # and one target
+    scanner = nav.scanner((nao1.x - 20-2.5)/ (0.5*np.sqrt(3)), (nao1.x - 20-2.5) / (0.5*np.sqrt(3)))
 
     while going:
         clock.tick(60)
@@ -154,7 +156,7 @@ def mainloop():
 
         # this updates the parameters and the state of the robot (collided or not, going or not
         if autonomous:
-            nav.scan_world(nao1, allobstacles, alltargets)
+            scanner.scan_world(nao1, allobstacles, alltargets)
         if collision_detection:
             collided = detect_collisions(nao1, allobstacles, allsounds, collided)
         if not target_reached:
