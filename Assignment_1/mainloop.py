@@ -11,6 +11,7 @@ from definitions import *
 import sprite_routines as sp
 import my_navigation_code as nav
 import numpy as np
+import csv
 
 
 def create_world(background):
@@ -103,7 +104,14 @@ def mainloop():
 
     nao1 = allrobots.sprites()[0]  # there is only one robot currently
     target = alltargets.sprites()[0] # and one target
-    scanner = nav.scanner((20-2.5 - nao1.x)/ (0.5*np.sqrt(3)), (20-2.5 - nao1.x) / (0.5*np.sqrt(3)))
+    (left, right) = nao1.sonar(allobstacles)
+    noisy_L = left + 3*np.random.normal()
+    noisy_R = right + 3*np.random.normal()
+    scanner = nav.scanner(noisy_L, noisy_R)
+
+    with open('data.csv', 'a') as file: 
+        writer = csv.writer(file)
+        writer.writerow([noisy_L, noisy_R, right])
 
     while going:
         clock.tick(60)

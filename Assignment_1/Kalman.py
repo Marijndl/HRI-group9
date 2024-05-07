@@ -17,7 +17,7 @@ def kalman_filter(mu, sigma, sonar_left, sonar_right, v):
     R = np.array([[np.random.normal(scale=0.01), 0], [0, np.random.normal(scale=0.01)]])  # Motion noise
     u = np.array([[v], [v]])
     dt = 0.05
-    B = np.array([[-1 * dt / (0.5 * np.sqrt(3)), 0], [0, -1 * dt / (0.5 * np.sqrt(3))]])
+    B = np.array([[-1 * dt, 0], [0, -1 * dt ]])
 
     # Update parameters with motion model:
     mu = np.dot(A, mu) + np.dot(B,u)

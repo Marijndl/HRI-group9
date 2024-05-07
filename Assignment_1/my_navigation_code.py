@@ -4,6 +4,7 @@ import behaviour_based_navigation_kalman as bn
 from definitions import *
 import random
 from Kalman import kalman_filter
+import csv
 
 
 def compute_target_location(robot, alltargets):
@@ -31,12 +32,17 @@ class scanner():
         # print sonar_left, sonar_right, target_distance, target_angle
         target_angle_robot =  target_angle - robot.phi  # This is the angle relative to the heading direction of the robot.
 
+        with open('data.csv', mode='a') as file:
+            writer = csv.writer(file)
+            writer.writerow([self.mu[0,0], self.mu[1,0], sonar_left])
+        
         turn_rate = bn.compute_turnrate(target_distance, target_angle_robot, sonar_left, sonar_right, robot)
         velocity  = bn.compute_velocity(target_distance, target_angle_robot, sonar_left, sonar_right)
         mu, sigma = kalman_filter(self.mu, self.sigma, sonar_left, sonar_right, velocity)
         self.mu = mu
         self.sigma = sigma
         print(mu, sigma)
+        
 
         robot.set_vel(velocity, turn_rate) # the simulated robot does not sidestep
 
