@@ -22,7 +22,7 @@ def compute_target_location(robot, alltargets):
 class scanner():
     def __init__(self, start_L, start_R):
         self.mu = np.array([[start_L], [start_R]])
-        self.sigma = np.array([[0.1, 0],[0, 0.1]])
+        self.sigma = np.array([[1, 0],[0, 1]])
         print("Initial")
         print(self.mu, self.sigma)
         
@@ -32,9 +32,9 @@ class scanner():
         # print sonar_left, sonar_right, target_distance, target_angle
         target_angle_robot =  target_angle - robot.phi  # This is the angle relative to the heading direction of the robot.
 
-        with open('data.csv', mode='a') as file:
+        with open('data.csv', mode='a') as file: 
             writer = csv.writer(file)
-            writer.writerow([self.mu[0,0], self.mu[1,0], sonar_left])
+            writer.writerow([self.mu[0,0], self.mu[1,0], sonar_left, self.sigma[0,0], self.sigma[1,1]]) 
         
         turn_rate = bn.compute_turnrate(target_distance, target_angle_robot, sonar_left, sonar_right, robot)
         velocity  = bn.compute_velocity(target_distance, target_angle_robot, sonar_left, sonar_right)
@@ -43,6 +43,7 @@ class scanner():
         self.sigma = sigma
         print(mu, sigma)
         
+
 
         robot.set_vel(velocity, turn_rate) # the simulated robot does not sidestep
 

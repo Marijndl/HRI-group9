@@ -105,13 +105,13 @@ def mainloop():
     nao1 = allrobots.sprites()[0]  # there is only one robot currently
     target = alltargets.sprites()[0] # and one target
     (left, right) = nao1.sonar(allobstacles)
-    noisy_L = left + 3*np.random.normal()
-    noisy_R = right + 3*np.random.normal()
+    noisy_L = left + np.random.normal()
+    noisy_R = right + np.random.normal()
     scanner = nav.scanner(noisy_L, noisy_R)
 
     with open('data.csv', 'a') as file: 
         writer = csv.writer(file)
-        writer.writerow([noisy_L, noisy_R, right])
+        writer.writerow([noisy_L, noisy_R, right, 1, 1])
 
     while going:
         clock.tick(60)
