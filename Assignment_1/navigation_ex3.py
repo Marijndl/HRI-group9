@@ -71,13 +71,14 @@ def continuously_avoid_obstacles(avoidance_duration = 4, stop = True):
         nao.Move(0,0,0)
 
 
-def walk_towards_target(target_x_location, sizeX, move_duration = 4,toggle=True):
+def walk_towards_target(target_x_location, sizeX, move_duration = 4):
     """
     Aligns body with target and sends Move command, moves 
     for `move_duration` seconds while avoiding obstacles, then stops.
     """
     #align body with target
     nao.Walk(0.,0.,target_x_location) 
+    nao.Move(0.3,0.3,0)
     continuously_avoid_obstacles(move_duration, stop=True)
 
 
@@ -145,7 +146,7 @@ while walk__bool == True:
     if is_at_target(sizeX):
         nao.Move(0.,0.,0.)
         walk__bool = False
-    walk_towards_target(target_x_location, sizeX)  
+    walk_towards_target(target_x_location, sizeX, move_duration=4)  
     found_bool, target_x_location, sizeX = look_on_spot()
 
 
