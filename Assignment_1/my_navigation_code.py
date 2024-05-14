@@ -22,8 +22,9 @@ def scan_world(robot, allobstacles, alltargets):
     target_distance, target_angle = compute_target_location(robot, alltargets)  # The angle is with respect to the world frame
     # print sonar_left, sonar_right, target_distance, target_angle
     target_angle_robot =  target_angle - robot.phi  # This is the angle relative to the heading direction of the robot.
-    
 
+            
+        
 
 
     turn_rate = bn.compute_turnrate(target_distance, target_angle_robot, sonar_left, sonar_right, robot.phi, target_angle)
