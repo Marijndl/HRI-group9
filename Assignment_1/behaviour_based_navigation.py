@@ -46,15 +46,6 @@ def FObstacle(sonar_distance, sonar_angle, robot_angle, sigma_obs=15, beta=3):
     return 0
 
 
-    
-    # # Implement the formula f_2(t)
-    # if sonar_distance < beta:  # Only apply force if obstacle is within a critical range
-    #     force_magnitude = np.exp(-angle_diff**2 / (2 * sigma_obs**2))
-    #     force_magnitude *= angle_diff * np.exp(-sonar_distance / beta)
-    #     return force_magnitude
-    # else:
-    #     return 0
-
 
 def FStochastic():
     """FStochastic adds noise to the turnrate force. This is just to make the simulation more realistic by adding some noie something useful here"""
