@@ -20,7 +20,7 @@ def FTarget(target_distance, robot_angle, target_angle):
 
 
 
-def FObstacle(sonar_distance, sonar_angle, robot_angle, sigma_obs=15, beta=3):
+def FObstacle(sonar_distance, sonar_angle, robot_angle, sigma_obs=15, beta=4):
     """
     Function to compute repulsive force from obstacles.
     
@@ -91,7 +91,7 @@ def compute_turnrate(target_dist, target_angle_robot, sonar_distance_left, sonar
     target_angle: Angle target with respect to the world frame.
     """
 
-    max_turnrate = 0.349 #rad/s # may need adjustment!
+    max_turnrate = 1.549 #rad/s # may need adjustment!
     delta_t = 0.15 # may need adjustment!
     sonar_angle_left = 30 * degree
     sonar_angle_right = -30 * degree
@@ -118,7 +118,7 @@ def compute_turnrate(target_dist, target_angle_robot, sonar_distance_left, sonar
     if abs(turnrate)>max_turnrate:
         turnrate=1.0 * turnrate/abs(turnrate)
     else:
-        turnrate=turnrate/max_turnrate
+        turnrate=turnrate/0.3
     #print round(sonar_distance_left, 4), round(sonar_distance_right, 4), "Fobs_left:", round(w_obstacle* Fobs_left, 4), "Fobs_right:", round(w_obstacle * Fobs_right, 4), "Ftarget:", round(w_target*FTarget(target_dist, robot_angle, target_angle), 4), "Forienting:", round(w_orienting* FOrienting(robot_angle, target_angle), 4), "Fstochastic:", round(w_stochastic*FStochastic(), 4), "FTotal:", round(FTotal, 4), "turnrate:", round(turnrate, 4), "angle test", round(robot_angle - target_angle, 4), "Robot angle", round(robot_angle, 4)
     #print round(sonar_distance_left, 4), round(sonar_distance_right, 4), "Fobs_left:", round(f_obs_left, 4), "Fobs_right:", round(f_obs_right, 4), "Ftarget:", round(f_target, 4), "Forienting:", round(f_orienting, 4), "Fstochastic:", round(f_stochastic, 4), "FTotal:", round(FTotal, 4), "turnrate:", round(turnrate, 4), "angle test", round(robot_angle - target_angle, 4), "Robot angle", round(robot_angle, 4)
     return turnrate
