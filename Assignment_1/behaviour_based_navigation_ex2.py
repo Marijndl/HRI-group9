@@ -11,7 +11,7 @@ def FTarget(target_distance, robot_angle, target_angle):
     Parameters:
     target_distance: Distance to the target.
     robot_angle: Current heading of the robot.
-    target_angle: Angle to the target with respect to the world frame.
+    target_angle: Angle target with respect to the world frame.
         
     """
  
@@ -20,7 +20,7 @@ def FTarget(target_distance, robot_angle, target_angle):
 
 
 
-def FObstacle(sonar_distance, sonar_angle, robot_angle, sigma_obs=1.5, beta=6):
+def FObstacle(sonar_distance, sonar_angle, robot_angle, sigma_obs=15, beta=4):
     """
     Function to compute repulsive force from obstacles.
     
@@ -32,32 +32,26 @@ def FObstacle(sonar_distance, sonar_angle, robot_angle, sigma_obs=1.5, beta=6):
         beta: Sensitivity parameter for distance effects.
 
     """
-    too_far=6 #cm
+    too_far=10 #cm
+
+    
 
     if sonar_distance < too_far:
         angle_diff = robot_angle - sonar_angle
+        print angle_diff, sonar_angle 
         force_magnitude = np.exp(-angle_diff**2 / (2 * sigma_obs**2))
         force_magnitude *= angle_diff * np.exp(-sonar_distance / beta)
 
-        return force_magnitude
+        return abs(force_magnitude)
     return 0
 
-
-    
-    # # Implement the formula f_2(t)
-    # if sonar_distance < beta:  # Only apply force if obstacle is within a critical range
-    #     force_magnitude = np.exp(-angle_diff**2 / (2 * sigma_obs**2))
-    #     force_magnitude *= angle_diff * np.exp(-sonar_distance / beta)
-    #     return force_magnitude
-    # else:
-    #     return 0
 
 
 def FStochastic():
     """FStochastic adds noise to the turnrate force. This is just to make the simulation more realistic by adding some noie something useful here"""
     Kstoch=0.03
     
-    Fstoch =Kstoch*random.randint(1,100)/100.0
+    Fstoch = Kstoch*random.randint(1,100)/100.0
     return Fstoch
 
 def FOrienting(robot_angle, target_angle):
@@ -94,44 +88,39 @@ def compute_turnrate(target_dist, target_angle_robot, sonar_distance_left, sonar
     sonar_distance_left: Distance to the left obstacle.
     sonar_distance_right: Distance to the right obstacle.
     robot_angle: Current angle robot.
-    target_angle: Angle to the target with respect to the world frame.
+    target_angle: Angle target with respect to the world frame.
     """
 
-    max_turnrate = 1.349 #rad/s # may need adjustment!
-
-    delta_t = 1.5 # may need adjustment!
+    max_turnrate = 1.549 #rad/s # may need adjustment!
+    delta_t = 0.15 # may need adjustment!
     sonar_angle_left = 30 * degree
     sonar_angle_right = -30 * degree
 
-    w_target = 10.0
-    w_obstacle = 20
-    w_orienting = 0.25
+    w_target = 0.5
+    w_obstacle = 2.0
+    w_orienting =  0.25
     w_stochastic = 0.1
 
-    
-    Fobs_left = FObstacle(sonar_distance_left, sonar_angle_left, robot_angle)
+    Fobs_left = -FObstacle(sonar_distance_left, sonar_angle_left, robot_angle)
     Fobs_right = FObstacle(sonar_distance_right, sonar_angle_right, robot_angle)
-
     
-    #print sonar_distance_left, sonar_distance_right, "Fobs_left:", w_obstacle* Fobs_left, "Fobs_right:", w_obstacle * Fobs_right, "Ftarget:", w_target*FTarget(target_dist, robot_angle, target_angle), "Forienting:", w_orienting* FOrienting(robot_angle, target_angle), "Fstochastic:", FStochastic()
-    
-    FTotal = w_target * FTarget(target_dist, robot_angle, target_angle) + \
-             w_obstacle * Fobs_left + \
-             w_obstacle * Fobs_right + \
-             w_orienting * FOrienting(robot_angle, target_angle_robot) + \
-             w_stochastic * FStochastic()
+    f_target = w_target * FTarget(target_dist, robot_angle, target_angle)
+    f_obs_left = w_obstacle * Fobs_left
+    f_obs_right = w_obstacle * Fobs_right
+    f_orienting = w_orienting * FOrienting(robot_angle, target_angle)
+    f_stochastic = w_stochastic * FStochastic()
 
-    
-
+    FTotal = f_target + f_obs_left + f_obs_right + f_orienting + f_stochastic
     # turnrate: d phi(t) / dt = sum( forces ) 
     turnrate =  FTotal*delta_t
-    
+
     #normalise turnrate value
-    if turnrate>max_turnrate:
-        turnrate=1.0
+    if abs(turnrate)>max_turnrate:
+        turnrate=1.0 * turnrate/abs(turnrate)
     else:
-        turnrate=turnrate/max_turnrate
-    print round(sonar_distance_left, 4), round(sonar_distance_right, 4), "Fobs_left:", round(w_obstacle* Fobs_left, 4), "Fobs_right:", round(w_obstacle * Fobs_right, 4), "Ftarget:", round(w_target*FTarget(target_dist, robot_angle, target_angle), 4), "Forienting:", round(w_orienting* FOrienting(robot_angle, target_angle), 4), "Fstochastic:", round(FStochastic(), 4), "FTotal:", round(FTotal, 4), "turnrate:", round(turnrate, 4)
+        turnrate=turnrate/0.3
+    #print round(sonar_distance_left, 4), round(sonar_distance_right, 4), "Fobs_left:", round(w_obstacle* Fobs_left, 4), "Fobs_right:", round(w_obstacle * Fobs_right, 4), "Ftarget:", round(w_target*FTarget(target_dist, robot_angle, target_angle), 4), "Forienting:", round(w_orienting* FOrienting(robot_angle, target_angle), 4), "Fstochastic:", round(w_stochastic*FStochastic(), 4), "FTotal:", round(FTotal, 4), "turnrate:", round(turnrate, 4), "angle test", round(robot_angle - target_angle, 4), "Robot angle", round(robot_angle, 4)
+    #print round(sonar_distance_left, 4), round(sonar_distance_right, 4), "Fobs_left:", round(f_obs_left, 4), "Fobs_right:", round(f_obs_right, 4), "Ftarget:", round(f_target, 4), "Forienting:", round(f_orienting, 4), "Fstochastic:", round(f_stochastic, 4), "FTotal:", round(FTotal, 4), "turnrate:", round(turnrate, 4), "angle test", round(robot_angle - target_angle, 4), "Robot angle", round(robot_angle, 4)
     return turnrate
 
 if __name__=="__main__":
