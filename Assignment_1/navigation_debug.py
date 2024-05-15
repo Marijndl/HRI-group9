@@ -19,7 +19,7 @@ nao.InitSonar(True)
 nao.InitLandMark()
 nao.InitVideo(resolution_id=2) # 2 = [640,480]
 
-sizeY_limits_a4 = {"min":[0.37,0.5], "max":[0.07,2]}
+sizeY_limits_a4 = {"min":[0.28,0.45], "max":[0.073,1.9]}
 # sizeY_limits_a4 = {"min":[0.45,0.5], "max":[0.22,2.5]}
 
 
@@ -35,9 +35,9 @@ def look_on_spot():
     scans current view for landmark, if not found, turns around and scans again
     """
     found_bool, xvalue, sizeY, current_yaw, yaw_rate = lookltr()
-    if found_bool == False: #if not in view, turn around and try again
-        nao.Walk(0.,0.,np.pi)
-        found_bool, xvalue, sizeY, current_yaw, yaw_rate = lookltr()
+    # if found_bool == False: #if not in view, turn around and try again
+    #     nao.Walk(0.,0.,np.pi)
+    #     found_bool, xvalue, sizeY, current_yaw = lookltr()
     return found_bool, xvalue, sizeY, current_yaw, yaw_rate
 
 def lookltr(yaw_rate = 0.5):
@@ -56,12 +56,15 @@ def lookltr(yaw_rate = 0.5):
         #every 2 seconds:
         if time.time() - start_time >= 2:
             nao.MoveHead(yaw_val=yaw_counter)
+            time.sleep(1)
             found_bool, target_x_location, sizeY = is_target_found()
 
             print(found_bool, yaw_counter)
             yaw_counter = yaw_counter - yaw_rate #update yaw
             start_time = time.time() #reset timer
-    return found_bool, target_x_location, sizeY, yaw_counter,yaw_rate
+
+    print("YAW, X VAL, CALC.:",yaw_counter+yaw_rate, target_x_location,yaw_counter+yaw_rate+target_x_location )
+    return found_bool, target_x_location, sizeY, yaw_counter, yaw_rate
 
 
 def is_target_found():
@@ -82,7 +85,7 @@ def continuously_avoid_obstacles(avoidance_duration = 4, stop = True):
         nao.Move(0,0,0)
 
 
-def walk_towards_target(target_x_location, sizeY,current_yaw, yaw_rate, move_duration = 4, stop = True):
+def walk_towards_target(target_x_location, sizeY,current_yaw, move_duration = 4, stop = True):
     """
     Aligns body with target and sends Move command, moves 
     for `move_duration` seconds while avoiding obstacles, then stops by default.
@@ -90,7 +93,7 @@ def walk_towards_target(target_x_location, sizeY,current_yaw, yaw_rate, move_dur
     #align body with target
     print("yaw, target x, +", current_yaw, target_x_location,current_yaw+target_x_location)
     raw_input("waiting - press enter")
-    nao.Walk(0.,0.,current_yaw+target_x_location+yaw_rate) 
+    nao.Walk(0.,0.,current_yaw+target_x_location) 
     nao.Move(0.6,0.6,0)
     continuously_avoid_obstacles(move_duration, stop=stop)
 
@@ -101,8 +104,11 @@ def get_target_distance(sizeY):
     """
     global sizeY_limits_a4
     size_min, dist_min = sizeY_limits_a4["min"]
+    # print(size_min, dist_min)
     size_max, dist_max = sizeY_limits_a4["max"]
-    return dist_min + (sizeY - size_min) * (dist_max - dist_min) / (size_max - size_min)
+    # print(size_max, dist_max)
+    # return dist_min + (sizeY - size_min) * (dist_max - dist_min) / (size_max - size_min)
+    return 1/((sizeY-size_max)/(size_min-size_max)) * (dist_max - dist_min) + dist_min
 
 
 def change_location_random(move_duration = 4, stop = True):
@@ -152,17 +158,35 @@ def is_at_target(sizeY, min_distance = 0.2):
 
 # while True:
 #     landmark_info_debug()
-found_bool, target_x_location, sizeY, current_yaw, yaw_rate = look_on_spot()
-print("am I close?",is_at_target(sizeY))
-while is_at_target(sizeY) == False:
-    if found_bool:
-        print("found!")
-        walk_towards_target(target_x_location, sizeY, current_yaw,yaw_rate, move_duration=4, stop = True)
-    else:
-        change_location_random(move_duration=4, stop = True) 
-    found_bool, target_x_location, sizeY, current_yaw, yaw_rate = look_on_spot()
-    nao.MoveHead(yaw_val=0)
+# found_bool, target_x_location, sizeY, current_yaw = look_on_spot()
+# print("am I close?",is_at_target(sizeY))
+# while is_at_target(sizeY) == False:
+#     if found_bool:
+#         print("found!")
+#         walk_towards_target(target_x_location, sizeY, current_yaw, move_duration=4, stop = True)
+#     else:
+#         change_location_random(move_duration=4, stop = True) 
+#     found_bool, target_x_location, sizeY, current_yaw = look_on_spot()
+#     nao.MoveHead(yaw_val=0)
 
+
+
+# found_bool = False
+# while found_bool == False:
+#     found_bool, target_x_location, sizeY, current_yaw, yaw_rate = look_on_spot()
+# dist = get_target_distance(sizeY)
+# print("dist:",dist)
+# # time.sleep(2)
+# nao.Walk(0,0,current_yaw+target_x_location+yaw_rate)
+# nao.Walk(dist-0.1,0,0)
+
+while True:
+    # landmark_info_debug()
+    detected, _, markerInfo = nao.DetectLandMark()
+    try:
+        print("Y, DIST:",get_target_distance(markerInfo[0][4]))
+    except:
+        pass
 ###################################################################### park robot
 
 nao.InitSonar(False)
