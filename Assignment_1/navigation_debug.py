@@ -93,8 +93,10 @@ def walk_towards_target(target_x_location, sizeY,current_yaw, yaw_rate, move_dur
     #align body with target
     print("yaw, target x, +", current_yaw, target_x_location,current_yaw+target_x_location)
     raw_input("waiting - press enter")
-    nao.Walk(0.,0.,current_yaw+target_x_location+yaw_rate) 
+    nao.Walk(0.,0.,current_yaw+target_x_location+yaw_rate)
+    #start moving
     nao.Move(1,1,0)
+    #keep avoiding obstacles for `move_duration` (and potentially stop after )
     continuously_avoid_obstacles(move_duration, stop=stop)
 
 
@@ -139,6 +141,9 @@ def is_obstacle_close(SL,SR, min_distance):
 def is_at_target(sizeY, size_limit = 0.28):
     return sizeY>=size_limit
 
+def love_move(sizeY,size_limit = 0.28):
+    love_speed= 1 - sizeY/size_limit
+    nao.Move(love_speed,0,0)
 
 
 
