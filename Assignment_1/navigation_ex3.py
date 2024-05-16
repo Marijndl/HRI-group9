@@ -10,7 +10,7 @@ import time
 
 ###################################################################### initialization
 
-robot_IP="192.168.0.112"
+robot_IP="192.168.0.102"
 # robot_IP="127.0.0.1"
 
 nao.InitProxy(robot_IP)
@@ -63,7 +63,7 @@ def lookltr(yaw_rate = 0.5):
             yaw_counter = yaw_counter - yaw_rate #update yaw
             start_time = time.time() #reset timer
 
-    print("YAW, X VAL, CALC. ROT.:",yaw_counter+yaw_rate, target_x_location,yaw_counter+yaw_rate+target_x_location )
+    print("YAW, X VAL, CALC. ROT.:",yaw_counter+yaw_rate+yaw_rate, target_x_location,yaw_counter+yaw_rate+target_x_location )
     return found_bool, target_x_location, sizeY, yaw_counter,yaw_rate
 
 
@@ -93,7 +93,7 @@ def walk_towards_target(target_x_location, sizeY,current_yaw, yaw_rate, move_dur
     #align body with target
     print("yaw, target x, +", current_yaw, target_x_location,current_yaw+target_x_location)
     raw_input("waiting - press enter")
-    nao.Walk(0.,0.,current_yaw+target_x_location+yaw_rate) 
+    nao.Walk(0.,0.,current_yaw+target_x_location+yaw_rate+yaw_rate) 
     nao.Move(1,1,0)
     continuously_avoid_obstacles(move_duration, stop=stop)
 
