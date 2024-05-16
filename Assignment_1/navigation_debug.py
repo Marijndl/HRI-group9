@@ -19,8 +19,6 @@ nao.InitSonar(True)
 nao.InitLandMark()
 nao.InitVideo(resolution_id=2) # [160,120],[320,240],[640,480],[1280,960]
 
-sizeY_limits_a4 = {"min":[0.28,0.45], "max":[0.073,1.9]}
-
 
 ###################################################################### function definitions
 
@@ -49,12 +47,11 @@ def lookltr(yaw_rate = 0.5):
     yaw_counter = yaw_start
     found_bool = False
 
-
+    #to prevent spotting the target before the head has turned
     initial_pause = True
 
     start_time = time.time()
     while ((found_bool == False) and (yaw_counter>=yaw_end)):
-        # print(landmark_info_debug())
         
         #every 2 seconds:
         if time.time() - start_time >= 2:
@@ -64,14 +61,13 @@ def lookltr(yaw_rate = 0.5):
                 initial_pause = False
             found_bool, target_x_location, sizeY = is_target_found()
 
-            print(found_bool, yaw_counter)
+            print(found_bool, yaw_counter) #debugging purposes
             yaw_counter = yaw_counter - yaw_rate #update yaw
             start_time = time.time() #reset timer
 
 
-    print("YAW REAL, X VAL, CALC. ROT.:",yaw_counter, target_x_location,yaw_counter+yaw_rate+yaw_rate+target_x_location )
-    return found_bool, target_x_location, sizeY, yaw_counter,yaw_rate
-    # return found_bool, target_x_location, sizeY, yaw_counter+yaw_rate,yaw_rate
+    print("lookltr - YAW REAL, X VAL, CALC. ROT.:",yaw_counter, target_x_location,yaw_counter+yaw_rate+yaw_rate+target_x_location )
+    return found_bool, target_x_location, sizeY, yaw_counter, yaw_rate
 
 def is_target_found():
     detected, _, markerInfo = nao.DetectLandMark()
@@ -96,10 +92,10 @@ def walk_towards_target(target_x_location, sizeY,current_yaw, yaw_rate, move_dur
     Aligns body with target and sends Move command, moves 
     for `move_duration` seconds while avoiding obstacles, then stops by default.
     """
-    #align body with target
-    print("real yaw, target x, +", current_yaw, target_x_location,current_yaw+yaw_rate+target_x_location)
+    #align body with target 
+    print("walk_towards_target - YAW REAL, X VAL, CALC. ROT.:", current_yaw, target_x_location,current_yaw+yaw_rate+yaw_rate+target_x_location)
     # raw_input("waiting - press enter") #pause
-    nao.Walk(0.,0.,current_yaw+yaw_rate+yaw_rate+target_x_location)
+    nao.Walk(0.,0.,current_yaw+yaw_rate+yaw_rate+target_x_location) #TODO determine yaw lag -> 1 * yaw_rate? 2 *?
     #start moving
     love_factor = calc_love_factor(sizeY)
     love_speed = love_factor
