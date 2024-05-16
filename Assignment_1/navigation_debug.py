@@ -20,7 +20,6 @@ nao.InitLandMark()
 nao.InitVideo(resolution_id=2) # 2 = [640,480]
 
 sizeY_limits_a4 = {"min":[0.28,0.45], "max":[0.073,1.9]}
-# sizeY_limits_a4 = {"min":[0.45,0.5], "max":[0.22,2.5]}
 
 
 ###################################################################### function definitions
@@ -30,14 +29,15 @@ def landmark_info_debug():
     print(detected,markerInfo)
 
 
-def look_on_spot():
+def look_on_spot(rotate=True):
     """
-    scans current view for landmark, if not found, turns around and scans again
+    scans current view for landmark
+    if not found and `rotate == True`, turns around and scans again 
     """
     found_bool, xvalue, sizeY, current_yaw, yaw_rate = lookltr()
-    # if found_bool == False: #if not in view, turn around and try again
-    #     nao.Walk(0.,0.,np.pi)
-    #     found_bool, xvalue, sizeY, current_yaw = lookltr()
+    if (found_bool == False) and (rotate == True): #if not in view, turn around and try again
+        nao.Walk(0.,0.,np.pi)
+        found_bool, xvalue, sizeY, current_yaw, yaw_rate = lookltr()
     return found_bool, xvalue, sizeY, current_yaw, yaw_rate
 
 def lookltr(yaw_rate = 0.5):
@@ -63,8 +63,8 @@ def lookltr(yaw_rate = 0.5):
             yaw_counter = yaw_counter - yaw_rate #update yaw
             start_time = time.time() #reset timer
 
-    print("YAW, X VAL, CALC.:",yaw_counter+yaw_rate, target_x_location,yaw_counter+yaw_rate+target_x_location )
-    return found_bool, target_x_location, sizeY, yaw_counter, yaw_rate
+    print("YAW, X VAL, CALC. ROT.:",yaw_counter+yaw_rate, target_x_location,yaw_counter+yaw_rate+target_x_location )
+    return found_bool, target_x_location, sizeY, yaw_counter,yaw_rate
 
 
 def is_target_found():
@@ -85,7 +85,7 @@ def continuously_avoid_obstacles(avoidance_duration = 4, stop = True):
         nao.Move(0,0,0)
 
 
-def walk_towards_target(target_x_location, sizeY,current_yaw, move_duration = 4, stop = True):
+def walk_towards_target(target_x_location, sizeY,current_yaw, yaw_rate, move_duration = 4, stop = True):
     """
     Aligns body with target and sends Move command, moves 
     for `move_duration` seconds while avoiding obstacles, then stops by default.
@@ -93,29 +93,16 @@ def walk_towards_target(target_x_location, sizeY,current_yaw, move_duration = 4,
     #align body with target
     print("yaw, target x, +", current_yaw, target_x_location,current_yaw+target_x_location)
     raw_input("waiting - press enter")
-    nao.Walk(0.,0.,current_yaw+target_x_location) 
-    nao.Move(0.6,0.6,0)
+    nao.Walk(0.,0.,current_yaw+target_x_location+yaw_rate) 
+    nao.Move(1,1,0)
     continuously_avoid_obstacles(move_duration, stop=stop)
-
-
-def get_target_distance(sizeY):
-    """
-    interpolate landmark distance from sizeY of landmark (assumes no sizeY deformations)
-    """
-    global sizeY_limits_a4
-    size_min, dist_min = sizeY_limits_a4["min"]
-    # print(size_min, dist_min)
-    size_max, dist_max = sizeY_limits_a4["max"]
-    # print(size_max, dist_max)
-    # return dist_min + (sizeY - size_min) * (dist_max - dist_min) / (size_max - size_min)
-    return 1/((sizeY-size_max)/(size_min-size_max)) * (dist_max - dist_min) + dist_min
 
 
 def change_location_random(move_duration = 4, stop = True):
     dx,dy,theta = get_random_move()
     nao.Walk(0.,0.,theta)
     nao.Move(dx,dy,0)
-    #while moving, check obstacles for n seconds (=move for n seconds) and then stop moving 
+    #while moving, continously check obstacles for n seconds (=move for n seconds) and then stop moving 
     continuously_avoid_obstacles(move_duration, stop=stop)
     print("@ new random location")
     
@@ -149,9 +136,10 @@ def is_obstacle_close(SL,SR, min_distance):
     return False
 
 
-def is_at_target(sizeY, min_distance = 0.2):
-    print("distance: ",get_target_distance(sizeY))
-    return get_target_distance(sizeY) <= min_distance
+def is_at_target(sizeY, size_limit = 0.28):
+    return sizeY>=size_limit
+
+
 
 
 ###################################################################### execution loop
@@ -184,7 +172,7 @@ while True:
     # landmark_info_debug()
     detected, _, markerInfo = nao.DetectLandMark()
     try:
-        print("Y, DIST:",get_target_distance(markerInfo[0][4]))
+        print("sizeY, is_at_target: ",markerInfo[0][4], is_at_target(markerInfo[0][4]))
     except:
         pass
 ###################################################################### park robot
