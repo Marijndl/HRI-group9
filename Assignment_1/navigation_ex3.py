@@ -93,9 +93,9 @@ def walk_towards_target(target_x_location, sizeY,current_yaw, yaw_rate, move_dur
     for `move_duration` seconds while avoiding obstacles, then stops by default.
     """
     #align body with target 
-    print("real yaw, target x, +", current_yaw, target_x_location,current_yaw+yaw_rate+target_x_location)
+    print("walk_towards_target - YAW REAL, X VAL, CALC. ROT.:", current_yaw, target_x_location,current_yaw+yaw_rate+yaw_rate+target_x_location)
     # raw_input("waiting - press enter") #pause
-    nao.Walk(0.,0.,current_yaw+yaw_rate+yaw_rate+target_x_location) #TODO determine yaw lag -> add 1 * yaw_rate? 2 *?
+    nao.Walk(0.,0.,current_yaw+yaw_rate+yaw_rate+target_x_location)
     #start moving
     love_factor = calc_love_factor(sizeY)
     love_speed = love_factor
@@ -114,8 +114,8 @@ def change_location_random(move_duration = 4, stop = True):
     
 
 def get_random_move():
-    dx = random.randint(5,10) * 0.05 
-    dy = random.randint(5,10) *0.05
+    dx = random.randint(5,11) * 0.1 #to get values from 0.5 to 1.
+    dy = random.randint(5,11) * 0.1
     theta = random.randint(0,314) * 0.01
     print("get_random_move: ",dx,dy, theta)
     return dx,dy, theta
@@ -127,7 +127,7 @@ def avoid_obstacle(min_distance=0.3):
 
     if SL<min_distance and SR<min_distance:
         print("both sonars obstacle - dodging - ", "SL:",SL, "SR:",SR)
-        nao.Walk(-min_distance*0.5, 0.,0.)
+        nao.Walk(-min_distance*0.5, 0.,np.pi/8)
     elif SL<min_distance:
         print("left sonar obstacle - dodging - ", "SL:",SL, "SR:",SR)
         nao.Walk(0.,-min_distance*0.5,0.)
@@ -135,11 +135,6 @@ def avoid_obstacle(min_distance=0.3):
         print("right sonar obstacle - dodging - ", "SL:",SL, "SR:",SR)
         nao.Walk(0.,min_distance*0.5,0.)
         
-
-def is_obstacle_close(SL,SR, min_distance):
-    if SL<min_distance or SR<min_distance:
-        return True
-    return False
 
 
 def is_at_target(sizeY, size_limit = 0.23):

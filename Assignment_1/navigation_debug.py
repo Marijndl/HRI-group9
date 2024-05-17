@@ -1,6 +1,6 @@
 import math
 import numpy as np
-import behaviour_based_navigation_ex2 as bn2
+# import behaviour_based_navigation_ex2 as bn2
 import random
 
 import nao_nocv_2_1 as nao
@@ -123,11 +123,11 @@ def get_random_move():
 
 def avoid_obstacle(min_distance=0.3):
     [SL, SR] = nao.ReadSonar()
-    SL, SR = round(SL,1), round(SR,1)
+    # SL, SR = round(SL,1), round(SR,1)
 
-    if SL<min_distance and SR<min_distance:
+    if SL<min_distance and SR<min_distance: 
         print("both sonars obstacle - dodging - ", "SL:",SL, "SR:",SR)
-        nao.Walk(-min_distance*0.5, 0.,0.)
+        nao.Walk(-min_distance*0.5, 0.,np.pi/8)
     elif SL<min_distance:
         print("left sonar obstacle - dodging - ", "SL:",SL, "SR:",SR)
         nao.Walk(0.,-min_distance*0.5,0.)
@@ -136,10 +136,6 @@ def avoid_obstacle(min_distance=0.3):
         nao.Walk(0.,min_distance*0.5,0.)
         
 
-def is_obstacle_close(SL,SR, min_distance):
-    if SL<min_distance or SR<min_distance:
-        return True
-    return False
 
 
 def is_at_target(sizeY, size_limit = 0.23):
