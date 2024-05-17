@@ -1,8 +1,6 @@
 import math
 import numpy as np
-import behaviour_based_navigation_ex2 as bn2
 import random
-
 import nao_nocv_2_1 as nao
 import time
 
@@ -59,6 +57,7 @@ def lookltr(yaw_rate = 0.5):
             if initial_pause:
                 time.sleep(2)
                 initial_pause = False
+            time.sleep(1)
             found_bool, target_x_location, sizeY = is_target_found()
 
             print(found_bool, yaw_counter) #debugging purposes
@@ -66,7 +65,7 @@ def lookltr(yaw_rate = 0.5):
             start_time = time.time() #reset timer
 
 
-    print("YAW REAL, X VAL, CALC. ROT.:",yaw_counter, target_x_location,yaw_counter+yaw_rate+yaw_rate+target_x_location )
+    print("YAW REAL, X VAL, CALC. ROT.:",yaw_counter, target_x_location,yaw_counter+yaw_rate+target_x_location )
     return found_bool, target_x_location, sizeY, yaw_counter,yaw_rate
 
 def is_target_found():
@@ -93,9 +92,9 @@ def walk_towards_target(target_x_location, sizeY,current_yaw, yaw_rate, move_dur
     for `move_duration` seconds while avoiding obstacles, then stops by default.
     """
     #align body with target 
-    print("walk_towards_target - YAW REAL, X VAL, CALC. ROT.:", current_yaw, target_x_location,current_yaw+yaw_rate+yaw_rate+target_x_location)
+    print("walk_towards_target - YAW REAL, X VAL, CALC. ROT.:", current_yaw, target_x_location,current_yaw+yaw_rate+target_x_location)
     # raw_input("waiting - press enter") #pause
-    nao.Walk(0.,0.,current_yaw+yaw_rate+yaw_rate+target_x_location)
+    nao.Walk(0.,0.,current_yaw+yaw_rate+target_x_location)
     #start moving
     love_factor = calc_love_factor(sizeY)
     love_speed = love_factor
@@ -123,7 +122,6 @@ def get_random_move():
 
 def avoid_obstacle(min_distance=0.3):
     [SL, SR] = nao.ReadSonar()
-    SL, SR = round(SL,1), round(SR,1)
 
     if SL<min_distance and SR<min_distance:
         print("both sonars obstacle - dodging - ", "SL:",SL, "SR:",SR)
@@ -137,14 +135,12 @@ def avoid_obstacle(min_distance=0.3):
         
 
 
-def is_at_target(sizeY, size_limit = 0.23):
+def is_at_target(sizeY, size_limit = 0.2):
     return sizeY>=size_limit
 
-def calc_love_factor(sizeY,size_limit = 0.23):
-    love_factor= 1 - sizeY/size_limit
-    # nao.Move(love_speed,0,0)
+def calc_love_factor(sizeY,size_limit = 0.20):
+    love_factor= 1 - sizeY/size_limit + 0.3
     return love_factor
-
 
 ###################################################################### main execution loop
 
@@ -152,7 +148,7 @@ found_bool, target_x_location, sizeY, current_yaw, yaw_rate = look_on_spot()
 
 while is_at_target(sizeY) == False:
     if found_bool:
-        print("target found!")
+        nao.Say("found it")
         nao.MoveHead(yaw_val=0)
         walk_towards_target(target_x_location, sizeY, current_yaw,yaw_rate, move_duration=4, stop = True)
     else:
