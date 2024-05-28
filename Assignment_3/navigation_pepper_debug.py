@@ -3,27 +3,25 @@ import numpy as np
 import random
 import nao_nocv_2_1 as nao
 import time
-import pepper_nocv_2_0 as pepper
-import pepper_laser as laser
+
 
 
 ###################################################################### initialization
 
-robot_IP="192.168.0.119"
+robot_IP="192.168.0.106"
 # robot_IP="127.0.0.1"
 
-pepper.InitProxy(robot_IP)
-pepper.InitPose()
-pepper.InitSonar(True)
-pepper.InitLandMark()
-# pepper.InitVideo(resolution_id=2) # [160,120],[320,240],[640,480],[1280,960]
-# pepper.ExtCollisionProtection("Move",True)
+nao.InitProxy(robot_IP)
+nao.InitPose()
+nao.InitSonar(True)
+nao.InitLandMark(True)
+nao.InitVideo(resolution_id=2) # [160,120],[320,240],[640,480],[1280,960]
 
 
 ###################################################################### function definitions
 
 def landmark_info_debug():
-    detected, timestamp, markerInfo=pepper.DetectLandMark()
+    detected, timestamp, markerInfo=nao.DetectLandMark()
     print(detected,markerInfo)
 
 
@@ -34,7 +32,7 @@ def look_on_spot(rotate=True):
     """
     found_bool, xvalue, sizeY, current_yaw, yaw_rate = lookltr()
     if (found_bool == False) and (rotate == True): #if not in view, turn around and try again
-        pepper.Walk(0.,0.,np.pi)
+        nao.Walk(0.,0.,np.pi)
         found_bool, xvalue, sizeY, current_yaw, yaw_rate = lookltr()
     return found_bool, xvalue, sizeY, current_yaw, yaw_rate
 
@@ -52,15 +50,17 @@ def lookltr(yaw_rate = 0.5):
 
     start_time = time.time()
     while ((found_bool == False) and (yaw_counter>=yaw_end)):
-        
+        # landmark_info_debug()
+        found_bool, target_x_location, sizeY = is_target_found()
+
         #every 2 seconds:
-        if time.time() - start_time >= 2:
-            pepper.MoveHead(yaw_val=yaw_counter)
+        if time.time() - start_time >= 3:
+            nao.MoveHead(yaw_val=yaw_counter)
             if initial_pause:
                 time.sleep(2)
                 initial_pause = False
-            time.sleep(1)
-            found_bool, target_x_location, sizeY = is_target_found()
+            # time.sleep(1)
+            # found_bool, target_x_location, sizeY = is_target_found()
 
             print(found_bool, yaw_counter) #debugging purposes
             yaw_counter = yaw_counter - yaw_rate #update yaw
@@ -71,7 +71,7 @@ def lookltr(yaw_rate = 0.5):
     return found_bool, target_x_location, sizeY, yaw_counter,yaw_rate
 
 def is_target_found():
-    detected, _, markerInfo = pepper.DetectLandMark()
+    detected, _, markerInfo = nao.DetectLandMark()
     if detected:
         return detected, markerInfo[0][1], markerInfo[0][4]
     return detected, 0, 0
@@ -83,9 +83,10 @@ def continuously_avoid_obstacles(avoidance_duration = 4, stop = True):
     """
     start_time = time.time()
     while (time.time() - start_time) <= avoidance_duration:
-        avoid_obstacle()
+        avoid_obstacle_pepper()
     if stop:
-        pepper.Move(0,0,0)
+        nao.Walk(0.,0.,0)
+        nao.Move(0,0,0)
 
 
 def walk_towards_target(target_x_location, sizeY,current_yaw, yaw_rate, move_duration = 10, stop = True):
@@ -96,19 +97,20 @@ def walk_towards_target(target_x_location, sizeY,current_yaw, yaw_rate, move_dur
     #align body with target 
     print("walk_towards_target - YAW REAL, X VAL, CALC. ROT.:", current_yaw, target_x_location,current_yaw+yaw_rate+target_x_location)
     # raw_input("waiting - press enter") #pause
-    pepper.Walk(0.,0.,current_yaw+yaw_rate+target_x_location)
+    nao.Walk(0.,0.,current_yaw+yaw_rate+target_x_location)
     #start moving
     love_factor = calc_love_factor(sizeY)
     love_speed = love_factor
-    pepper.Move(love_speed,0,0)
+    nao.Walk(0.,0.,0)
+    nao.Move(love_speed,0,0)
     #keep avoiding obstacles for `move_duration` (and potentially stop after )
     continuously_avoid_obstacles(move_duration, stop=stop)
 
 
 def change_location_random(move_duration = 4, stop = True):
     dx,dy,theta = get_random_move()
-    pepper.Walk(0.,0.,theta)
-    pepper.Move(dx,dy,0)
+    nao.Walk(0.,0.,theta)
+    nao.Move(dx,dy,0)
     #while moving, continously check obstacles for n seconds (=move for n seconds) and then stop moving 
     continuously_avoid_obstacles(move_duration, stop=stop)
     print("@ new random location")
@@ -123,22 +125,41 @@ def get_random_move():
 
 
 def avoid_obstacle(min_distance=0.3):
-    [SL, SR] = pepper.ReadSonar()
+    [SL, SR] = nao.ReadSonar()
 
     if SL<min_distance and SR<min_distance:
         print("both sonars obstacle - dodging - ", "SL:",SL, "SR:",SR)
-        pepper.Walk(-min_distance*0.5, 0.,np.pi/8)
+        nao.Walk(-min_distance*0.5, 0.,np.pi/8)
     elif SL<min_distance:
         print("left sonar obstacle - dodging - ", "SL:",SL, "SR:",SR)
-        pepper.Walk(0.,-min_distance*0.5,0.)
+        nao.Walk(0.,-min_distance*0.5,0.)
     elif SR<min_distance:
         print("right sonar obstacle - dodging - ", "SL:",SL, "SR:",SR)
-        pepper.Walk(0.,min_distance*0.5,0.)
+        nao.Walk(0.,min_distance*0.5,0.)
+
+
+def avoid_obstacle_pepper(min_distance=0.5):
+    [SF, SB] = nao.ReadSonarPepper()
+
+    if SF<min_distance:
+        print("front obstacle - dodging - ", "SF:",SF)
+        # nao.Walk(-min_distance*0.5, 0.,np.pi/8)
+        # nao.Move(0,0,0)
+        # nao.Walk(0,0,0)
+        # nao.Move(-min_distance*0.5, 0.,np.pi/8)
+        # time.sleep(1)
+        # nao.Move(0,0,0)
+        # dx,dy,theta = get_random_move()
+        nao.Walk(0.,0.,0)
+        nao.Move(-1,0,0)
+        time.sleep(5)
+        nao.Move(0,0,0)
         
 
 
 def is_at_target(sizeY, size_limit = 0.2):
     return sizeY>=size_limit
+
 
 def calc_love_factor(sizeY,size_limit = 0.20):
     love_factor= 1 - sizeY/size_limit + 0.3
@@ -146,27 +167,29 @@ def calc_love_factor(sizeY,size_limit = 0.20):
 
 ###################################################################### main execution loop
 
-found_bool, target_x_location, sizeY, current_yaw, yaw_rate = look_on_spot()
+# sizeY = 0
+# while is_at_target(sizeY) == False:
+#     found_bool, target_x_location, sizeY, current_yaw,yaw_rate = look_on_spot()
+#     if found_bool:
+#         nao.Say("found it")
+#         nao.MoveHead(yaw_val=0)
+#         walk_towards_target(target_x_location, sizeY, current_yaw,yaw_rate, move_duration=4, stop = True)
+#     else:
+#         change_location_random(move_duration=4, stop = True) 
+#     nao.MoveHead(yaw_val=0)
 
-while is_at_target(sizeY) == False:
-    if found_bool:
-        pepper.Say("found it")
-        pepper.MoveHead(yaw_val=0)
-        walk_towards_target(target_x_location, sizeY, current_yaw,yaw_rate, move_duration=4, stop = True)
-    else:
-        change_location_random(move_duration=4, stop = True) 
-    found_bool, target_x_location, sizeY, current_yaw,yaw_rate = look_on_spot()
-    pepper.MoveHead(yaw_val=0)
 
-# while True:
-#     pepper.ReadSonar()
-#     # laser.get_laser_scan()
-#     landmark_info_debug()    
+# nao.Walk(0.,0.,0)
+# nao.Move(1,0,0)
+# time.sleep(3)
+# nao.Move(0,0,0)
 
+
+while True:
+    avoid_obstacle_pepper()
 
 
 ###################################################################### park robot
-
-pepper.InitSonar(False)
-# pepper.ExtCollisionProtection("Move",False)
-pepper.Crouch()  
+nao.InitLandMark(False)
+nao.InitSonar(False)
+nao.Crouch()  
