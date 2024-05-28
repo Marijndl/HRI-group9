@@ -99,6 +99,12 @@ class ResolutionCamera:
         self.resolutionar = [160,120],[320,240],[640,480],[1280,960]
         self.framerate=30
 
+def ReadSonarPepper():
+    SonarFront = "Device/SubDeviceList/Platform/Front/Sonar/Sensor/Value"
+    SonarBack = "Device/SubDeviceList/Platform/Back/Sonar/Sensor/Value"
+    return [memoryProxy.getData(SonarFront,0), memoryProxy.getData(SonarBack,0)]
+
+
 
 camera_resolution = ResolutionCamera()
 
