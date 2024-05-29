@@ -3,12 +3,12 @@ import numpy as np
 import random
 import nao_nocv_2_1 as nao
 import time
-
+import naoqi
 
 
 ###################################################################### initialization
 
-robot_IP="192.168.0.106"
+robot_IP="192.168.0.105"
 # robot_IP="127.0.0.1"
 
 nao.InitProxy(robot_IP)
@@ -138,9 +138,9 @@ def avoid_obstacle(min_distance=0.3):
         nao.Walk(0.,min_distance*0.5,0.)
 
 
-def avoid_obstacle_pepper(min_distance=0.5):
+def avoid_obstacle_pepper(min_distance=0.35):
     [SF, SB] = nao.ReadSonarPepper()
-
+    print("front sonar distance:", SF)
     if SF<min_distance:
         print("front obstacle - dodging - ", "SF:",SF)
         # nao.Walk(-min_distance*0.5, 0.,np.pi/8)
@@ -150,10 +150,17 @@ def avoid_obstacle_pepper(min_distance=0.5):
         # time.sleep(1)
         # nao.Move(0,0,0)
         # dx,dy,theta = get_random_move()
-        nao.Walk(0.,0.,0)
-        nao.Move(-1,0,0)
-        time.sleep(5)
-        nao.Move(0,0,0)
+        
+        nao.Walk(0,0.,np.pi/8)
+
+        nao.Walk(-0.5,0,0)
+
+        time.sleep(2)
+
+        # nao.Move(-1,0,0)
+        
+        # time.sleep(0.5)
+        # nao.Move(0,0,0)
         
 
 
@@ -161,9 +168,8 @@ def is_at_target(sizeY, size_limit = 0.2):
     return sizeY>=size_limit
 
 
-def calc_love_factor(sizeY,size_limit = 0.20):
-    love_factor= 1 - sizeY/size_limit + 0.3
-    return love_factor
+def calc_love_factor(sizeY,size_limit = 0.20, calibration_constant = 0.3):
+    return 1 - sizeY/size_limit + calibration_constant
 
 ###################################################################### main execution loop
 
@@ -187,6 +193,21 @@ def calc_love_factor(sizeY,size_limit = 0.20):
 
 while True:
     avoid_obstacle_pepper()
+
+
+# motion_proxy = naoqi.ALProxy("ALMotion", robot_IP, 9559)
+# motion_proxy.wakeUp()
+    
+# # Move the robot backward 0.5 meters
+# # x, y, theta (x is forward/backward, y is left/right, theta is rotation)
+# motion_proxy.moveTo(-0.5, 0, 0)
+
+# # Rotate the robot by 22.5 degrees (convert degrees to radians)
+# motion_proxy.moveTo(0, 0, 22.5 * 3.14159 / 180)
+
+# # Go to rest after movement
+# motion_proxy.rest()
+
 
 
 ###################################################################### park robot
