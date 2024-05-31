@@ -40,12 +40,14 @@ class StateMachine():
         self.dialog_p.unsubscribe(module_name)
 
     def DoStateInit(self):
-        """Do initialization"""
-        mylib.InitRobot()
-        return "My state A"
+        print("State: Initial")
+
+        # mylib.InitRobot()
+        return "Roaming"
 
     def StateRoaming(self, mystate):
-        """Execute state A"""
+        print("State: Roaming")
+
         if mystate == "My state A":
             mylib.behaviourA()
             pass
@@ -54,6 +56,8 @@ class StateMachine():
         return "My state B"
 
     def StateDetectedVisitor(self, mystate):
+        print("State: Detected visitor")
+
         topf_path = base_dir + "greeting_enu.top"
         topic = self.ActivateTopic(topf_path)
 
@@ -74,19 +78,30 @@ class StateMachine():
  
 
     def StateInteracting(self, mystate):
+        print("State: Interacting with visitor")
+
         topf_path = base_dir + "greeting_enu.top"
         topic = self.ActivateTopic(topf_path)
 
-        return None
+        #Start timer
+        start_time = time.time()
+
+        while time.time() - start_time < 10:
+            # Check for speech detection
+            speech_detected = self.memory_p.getData("ALSpeechRecognition/Status")
+            if speech_detected:
+                start_time = time.time()
+                break
+            time.sleep(0.5)  # Check every 500 ms
+
+        # If no more interaction, move to other state of roaming around again
+        self.DeactivateTopic(topic)
+        return "Roaming"
 
     def StateMovingVisitor(self, mystate):
-        """Execute state A"""
-        if mystate == "My state A":
-            mylib.behaviourA()
-            pass
-        elif mystate == "My state B":
-            pass
-        return "My state B"
+        print("State: Moving with visitor")
+
+        return None
 
     # Main
     def main(self):
