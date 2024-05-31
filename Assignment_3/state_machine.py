@@ -90,14 +90,16 @@ class StateMachine():
         # while abs(time.time() - start_time) < 100:
             # Check if the variable is triggered]
         moving_trigerred = self.memory_p.getData("Move")
+        print(moving_trigerred)
 
-        while moving_trigerred != 1:
+        while moving_trigerred != 0:
             moving_trigerred = self.memory_p.getData("Move")
 
-            if moving_trigerred:
-                break
+            # if moving_trigerred == :
+            #     break
 
             time.sleep(0.5)  # Check every 500 ms
+        
         
         
         # If no more interaction, move to other state of roaming around again
@@ -110,7 +112,7 @@ class StateMachine():
     def StateMovingVisitor(self, mystate):
         print("State: Moving with visitor")
 
-        return None
+        return "Done"
 
     # Main
     def main(self):
