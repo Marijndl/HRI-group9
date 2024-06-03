@@ -65,18 +65,7 @@ class StateMachine():
         topf_path = base_dir + "greeting_enu.top"
         topic = self.ActivateTopic(topf_path)
 
-        #Start timer
-        start_time = time.time()
 
-        while time.time() - start_time < 10:
-            # Check for speech detection
-            speech_detected = self.memory_p.getData("ALSpeechRecognition/Status")
-            if speech_detected:
-                start_time = time.time()
-                break
-            time.sleep(0.5)  # Check every 500 ms
-
-        # If no more interaction, move to other state of roaming around again
         self.DeactivateTopic(topic)
         return "Roaming"
  
@@ -87,23 +76,12 @@ class StateMachine():
         topf_path = base_dir + "PracticalQuestion_enu.top"
         topic = self.ActivateTopic(topf_path)
 
-        #Start timer
-        # start_time = time.time()
-
-        # while abs(time.time() - start_time) < 100:
-            # Check if the variable is triggered]
         moving_trigerred = self.memory_p.getData("Move")
         print(moving_trigerred)
 
         while moving_trigerred != 0:
             moving_trigerred = self.memory_p.getData("Move")
-
-            # if moving_trigerred == :
-            #     break
-
-            time.sleep(0.5)  # Check every 500 ms
-        
-        
+            time.sleep(0.5)  # Check every 500 ms    
         
         # If no more interaction, move to other state of roaming around again
         self.DeactivateTopic(topic)
