@@ -1,6 +1,7 @@
 import nao_nocv_2_1 as nao
 from naoqi import ALProxy
 import time
+import keyboard
 
 robot_ip = "192.168.0.116"
 port = 9559  # Robot port number
@@ -14,9 +15,9 @@ class StateMachine():
         self.dialog_p = ALProxy('ALDialog', self.robot_ip, self.port)
         self.memory_p = ALProxy('ALMemory', self.robot_ip, self.port)
         self.dialog_p.setLanguage("English")
+        self.topics = []
         print("Setup the robot")
 
-    # Function definitions
     def ActivateTopic(self, topf_path, module_name='MyModule'):
         # Load topic - absolute path is required
         topf_path = topf_path.decode('utf-8')
@@ -27,6 +28,8 @@ class StateMachine():
 
         # Activate dialog
         self.dialog_p.activateTopic(topic)
+
+        self.topics.append(topic)
 
         return topic
 
@@ -119,20 +122,28 @@ class StateMachine():
         # Initial state
         state = "Interacting"
 
-        while state != "Done":
+        while True:
+            # Check if 'q' key is pressed
+            if keyboard.is_pressed('q'):
+                print("You pressed 'q'. Exiting the program. And shutting down topics")
+                
+                #Stop topics
+                for topic in self.topics:
+                    self.DeactivateTopic(topic)
+                break
             
-            # last_command = self.memory_p.getData("Dialog/LatestCommand")
+            # while state != "Done":
+                
+            #     # last_command = self.memory_p.getData("Dialog/LatestCommand")
 
-            if state == "Roaming":
-                state = self.StateRoaming(state)
-            elif state == "Detected visitor":
-                state = self.StateDetectedVisitor(state)
-            elif state == "Interacting":
-                state = self.StateInteracting(state)
-            elif state == "Moving with visitor":
-                state = self.StateMovingVisitor(state)
-            # elif last_command == "quit":
-            #     break
+            #     if state == "Roaming":
+            #         state = self.StateRoaming(state)
+            #     elif state == "Detected visitor":
+            #         state = self.StateDetectedVisitor(state)
+            #     elif state == "Interacting":
+            #         state = self.StateInteracting(state)
+            #     elif state == "Moving with visitor":
+            #         state = self.StateMovingVisitor(state)
             
 
 if __name__ == "__main__":
