@@ -13,7 +13,7 @@ class StateMachine():
         self.port = port
         self.base_dir = base_dir
         self.dialog_p = ALProxy('ALDialog', self.robot_ip, self.port)
-        self.memory_p = ALProxy('ALMemory', self.robot_ip, self.port)           
+        self.memory_p = ALProxy('ALMemory', self.robot_ip, self.port)         
         self.dialog_p.setLanguage("English")
         self.topics = []
         self.gestures = nao.GetAvailableGestures()
@@ -73,17 +73,24 @@ class StateMachine():
 
         topf_path = base_dir + "PracticalQuestion_enu.top"
         topic = self.ActivateTopic(topf_path)
+        
+        moving_trigerred = 0
+        self.memory_p.insertData('Move','0')
+        print(self.memory_p.getData('Move'))
 
-        moving_trigerred = self.memory_p.getData("Move")
         start = time.time()
 
-        while moving_trigerred != 0: # and (time.time() - start) < 10:
-            moving_trigerred = self.memory_p.getData("Move")
+        while str(moving_trigerred) == '0':# and (time.time() - start) < 10:
+            try:
+                moving_trigerred = self.memory_p.getData('Move')
+            except:
+                moving_trigerred = 0
             time.sleep(0.5)  # Check every 500 ms    
         
         # If no more interaction, move to other state of roaming around again
+        time.sleep(2)
         self.DeactivateTopic(topic)
-        if moving_trigerred == 0:
+        if str(moving_trigerred) == '1':
             return "Moving with visitor"
         else:
             return "Roaming"
@@ -91,25 +98,58 @@ class StateMachine():
     def StateMovingVisitor(self, mystate):
         print("State: Moving with visitor")
 
+        topf_path = base_dir + "Painting_enu.top"
+        topic = self.ActivateTopic(topf_path)
+
         start = time.time()
 
-        psv_trigerred = self.memory_p.getData("psv")
-        vang_trigerred = self.memory_p.getData("vangogh")
+        painting_trigerred = 0
+        self.memory_p.insertData('Painting','0')
+        print(self.memory_p.getData('Painting'))
 
-        while psv_trigerred != 0 and vang_trigerred != 0: #and (time.time() - start) < 10:
+        while str(painting_trigerred) == "0":
             #Update states
-            psv_trigerred = self.memory_p.getData("psv")
-            vangogh_trigerred = self.memory_p.getData("vangogh")
+            try:
+                painting_trigerred = self.memory_p.getData("Painting")
+            except:
+                painting_trigerred = 0
             time.sleep(0.5)  # Check every 500 ms 
+        
+        print(painting_trigerred)
+        time.sleep(2)
+        self.DeactivateTopic(topic)
+        time.sleep(2)
 
-        if psv_trigerred == 0: 
+        ### Painting scenarios:
+        if str(painting_trigerred).lower() == "psv":
             #TODO: movement
-            topf_path_psv = base_dir + "PracticalQuestion_enu.top"
-            # topic = self.ActivateTopic(topf_path_psv)
-        elif vangogh_trigerred == 0:
+            topf_path_psv = base_dir + "PSV_enu.top"
+            topic = self.ActivateTopic(topf_path_psv)
+
+        elif str(painting_trigerred).lower() == "van_gogh":
             #TODO: movement
-            topf_path_vangogh = base_dir + "PracticalQuestion_enu.top"
-            # topic = self.ActivateTopic(topf_path_vangogh)
+            topf_path_vangogh = base_dir + "vanGogh_enu.top"
+            topic = self.ActivateTopic(topf_path_vangogh)
+ 
+        else:
+            print("We don't have that painting")
+            return "Roaming"
+
+        new_painting_trigerred = "No decision yet"
+        self.memory_p.insertData('Decision','No decision yet')
+        print(self.memory_p.getData('Decision'))
+
+        while str(new_painting_trigerred) == "No decision yet":
+            #Update states
+            try:
+                new_painting_trigerred = self.memory_p.getData("Decision")
+            except:
+                new_painting_trigerred = "No decision yet"
+            time.sleep(0.5)  # Check every 500 ms
+
+        self.DeactivateTopic(topic)
+        if str(painting_trigerred).lower() == "yes":
+            return "Moving with visitor"
         else:
             return "Roaming"
 
