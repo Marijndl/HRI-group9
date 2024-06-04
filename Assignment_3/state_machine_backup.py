@@ -16,6 +16,7 @@ class StateMachine():
         self.memory_p = ALProxy('ALMemory', self.robot_ip, self.port)           
         self.dialog_p.setLanguage("English")
         self.topics = []
+        self.gestures = nao.GetAvailableGestures()
         print("Setup the robot")
 
     def ActivateTopic(self, topf_path, module_name='MyModule'):
