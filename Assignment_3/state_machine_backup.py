@@ -74,8 +74,15 @@ class StateMachine():
         topf_path = base_dir + "PracticalQuestion_enu.top"
         topic = self.ActivateTopic(topf_path)
         
+        #Setting all triggers to zero
         moving_trigerred = 0
+        time_gesture = 0
+        bathroom_gesture = 0
+        nod_gesture = 0
         self.memory_p.insertData('Move','0')
+        self.memory_p.insertData('Time','0')
+        self.memory_p.insertData('Bathroom','0')
+        self.memory_p.insertData('Nod','0')
         print(self.memory_p.getData('Move'))
 
         start = time.time()
@@ -83,8 +90,29 @@ class StateMachine():
         while str(moving_trigerred) == '0':# and (time.time() - start) < 10:
             try:
                 moving_trigerred = self.memory_p.getData('Move')
+                time_gesture = self.memory_p.getData('Time')
+                bathroom_gesture = self.memory_p.getData('Bathroom')
+                nod_gesture = self.memory_p.getData('Nod')
             except:
                 moving_trigerred = 0
+                time_gesture = 0
+                bathroom_gesture = 0
+                nod_gesture = 0
+            
+            #If triggered, run gestures
+            if str(time_gesture) == '1':
+                nao.RunMovement('CheckTime.py')
+                self.memory_p.insertData('Time','0')
+                time.sleep(5)
+            elif str(bathroom_gesture) == '1':
+                nao.RunMovement('Bathroom.py')
+                self.memory_p.insertData('Bathroom','0')
+                time.sleep(5)
+            elif str(nod_gesture) == '1':
+                nao.RunMovement('Nod.py')
+                self.memory_p.insertData('Nod','0')
+                time.sleep(5)
+
             time.sleep(0.5)  # Check every 500 ms    
         
         # If no more interaction, move to other state of roaming around again
@@ -156,7 +184,7 @@ class StateMachine():
     # Main
     def main(self):
         # Initial state
-        state = "Interacting"
+        state = "Moving with visitor"
 
         while True:
             # Check if 'q' key is pressed
