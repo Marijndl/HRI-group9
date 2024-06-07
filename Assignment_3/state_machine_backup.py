@@ -99,7 +99,7 @@ class StateMachine():
                 time_gesture = 0
                 bathroom_gesture = 0
                 nod_gesture = 0
-            
+
             #If triggered, run gestures
             if str(time_gesture) == '1':
                 time_gesture = 0
@@ -112,14 +112,25 @@ class StateMachine():
                 self.memory_p.insertData('Bathroom','0')
                 nao.RunMovement('Bathroom.py')
                 time.sleep(5)
-
+            
             elif str(nod_gesture) == '1':
                 nod_gesture = 0
                 self.memory_p.insertData('Nod','0')
                 nao.RunMovement('Nod.py')
                 time.sleep(5)
+                print(nod_gesture) 
 
-            time.sleep(0.5)  # Check every 500 ms    
+
+            # Needed to avoid double animations
+            # moving_trigerred = 0
+            time_gesture = 0
+            bathroom_gesture = 0
+            nod_gesture = 0
+            # self.memory_p.insertData('Move','0')
+            self.memory_p.insertData('Time','0')
+            self.memory_p.insertData('Bathroom','0')
+            self.memory_p.insertData('Nod','0')
+            time.sleep(0.5)  # Check every 500 ms   
         
         # If no more interaction, move to other state of roaming around again
         time.sleep(2)
@@ -171,7 +182,7 @@ class StateMachine():
             topic = self.ActivateTopic(topf_path_vangogh)
 
             #Start topic
-            nao.Say("Vincent van Goghs De sterrennacht, The Starry Night, painted in 1889, is one of his most renowned works. The painting depicts a swirling night sky filled with vibrant, expressive stars above a quiet village. Do you want more information on the painting or would you like to continue?")
+            nao.Say("What you see here is the painting The Starry Night by VIncent van Gogh. The starruy night, painted in 1889, is one of his most renowned works. The painting depicts a swirling night sky filled with vibrant, expressive stars above a quiet village. Do you want more information on the painting or would you like to continue?")
             # nao.Say("Yeah")
         else:
             print("We don't have that painting")
