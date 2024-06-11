@@ -342,8 +342,33 @@ class StateMachine():
 
     # Main
     def main(self):
+        """
+        The main function of the state machine.
+
+        This function initializes the state machine in the "Detected visitor" state and enters 
+        a loop that continually checks for state transitions. It monitors for the 'q' key 
+        press to gracefully shut down and exit the program. Within the loop, it handles 
+        transitions between states such as "Roaming", "Detected visitor", "Interacting", 
+        and "Moving with visitor", based on the current state and actions performed in 
+        each state's corresponding method.
+
+        The state machine exits the loop and shuts down all active dialog topics if the 
+        'q' key is pressed.
+
+        The main states and their transitions are:
+            - "Roaming": Executes roaming behavior and transitions to "Done".
+            - "Detected visitor": Detects a visitor and transitions to either "Interacting" or "Roaming".
+            - "Interacting": Interacts with the visitor and transitions to either "Moving with visitor" or "Roaming".
+            - "Moving with visitor": Moves with the visitor and provides information about paintings, then transitions based on visitor's decision.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
         # Initial state
-        state = "Interacting"
+        state = "Detected visitor"
 
         while True:
             # Check if 'q' key is pressed
