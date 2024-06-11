@@ -8,7 +8,27 @@ port = 9559  # Robot port number
 base_dir = "/home/nao/group_09/"
 
 class StateMachine():
+    """
+    A class to represent the state machine controlling the NAO robot's interactions.
+
+    Attributes:
+        robot_ip (str): IP address of the robot.
+        port (int): Port number for the robot.
+        base_dir (str): Base directory for topic files.
+        dialog_p (ALProxy): Proxy to the robot's dialog system.
+        memory_p (ALProxy): Proxy to the robot's memory.
+        topics (list): List of loaded dialog topics.
+        gestures (list): List of available gestures for the robot.
+    """
     def __init__(self, robot_ip, port, base_dir):
+        """
+        Initializes the StateMachine with the robot's IP address, port, and base directory.
+
+        Args:
+            robot_ip (str): IP address of the robot.
+            port (int): Port number for the robot.
+            base_dir (str): Base directory for topic files.
+        """
         self.robot_ip = robot_ip
         self.port = port
         self.base_dir = base_dir
@@ -22,6 +42,16 @@ class StateMachine():
         print("Setup the robot")
 
     def ActivateTopic(self, topf_path, module_name='MyModule'):
+        """
+        Activates a dialog topic.
+
+        Args:
+            topf_path (str): Path to the topic file.
+            module_name (str): Name of the module. Default is 'MyModule'.
+
+        Returns:
+            str: The loaded topic.
+        """
         # Load topic - absolute path is required
         topf_path = topf_path.decode('utf-8')
         topic = self.dialog_p.loadTopic(topf_path.encode('utf-8'))
@@ -37,6 +67,13 @@ class StateMachine():
         return topic
 
     def DeactivateTopic(self, topic, module_name='MyModule'):
+        """
+        Deactivates a dialog topic.
+
+        Args:
+            topic (str): The topic to deactivate.
+            module_name (str): Name of the module. Default is 'MyModule'.
+        """
         # Deactivate topic
         self.dialog_p.deactivateTopic(topic)
 
@@ -47,12 +84,27 @@ class StateMachine():
         self.dialog_p.unsubscribe(module_name)
 
     def DoStateInit(self):
+        """
+        Executes the initial state.
+
+        Returns:
+            str: The next state, "Roaming".
+        """
         print("State: Initial")
 
         # mylib.InitRobot()
         return "Roaming"
 
     def StateRoaming(self, mystate):
+        """
+        Executes the roaming state.
+
+        Args:
+            mystate (str): The current state.
+
+        Returns:
+            str: The next state, "Done".
+        """ 
         print("State: Roaming")
 
 
@@ -60,6 +112,20 @@ class StateMachine():
         return "Done"
 
     def StateDetectedVisitor(self, mystate):
+        """
+        Executes the state when a visitor is detected.
+        
+        This state involves checking for the presence of a visitor by detecting faces.
+        If a face is detected, the robot will greet the visitor by saying "Hello!" and
+        lighting up its eyes in blue. It will then transition to the "Interacting" state.
+        If no face is detected within a certain time frame, it will return to the "Roaming" state.
+
+        Args:
+            mystate (str): The current state.
+
+        Returns:
+            str: The next state, either "Interacting" or "Roaming".
+        """
         print("State: Detected visitor")
     
         face_detected, timestamp, location = nao.DetectFace() # Face detecting
@@ -95,6 +161,22 @@ class StateMachine():
  
 
     def StateInteracting(self, mystate):
+        """
+        Executes the state when interacting with a visitor.
+        
+        This state involves activating a predefined dialog topic and monitoring for specific
+        triggers in the robot's memory. Based on these triggers, the robot performs various gestures
+        such as checking the time, indicating the bathroom location, or nodding. The state will
+        continue to monitor for these triggers until a "Move" command is detected, indicating the 
+        visitor wants to move, at which point it transitions to the "Moving with visitor" state. 
+        If no move command is detected, it will return to the "Roaming" state.
+
+        Args:
+            mystate (str): The current state.
+
+        Returns:
+            str: The next state, either "Moving with visitor" or "Roaming".
+        """
         print("State: Interacting with visitor")
 
         #Load topic file
@@ -165,6 +247,23 @@ class StateMachine():
             return "Roaming"
 
     def StateMovingVisitor(self, mystate):
+        """
+        Executes the state when moving with a visitor.
+        
+        This state involves activating a predefined dialog topic related to paintings.
+        The robot will ask the visitor which painting they want information about.
+        Depending on the visitor's response, the robot will provide information about
+        either a painting related to PSV or a painting by Van Gogh. The robot will 
+        continue to interact with the visitor based on the chosen painting and then
+        ask if they want more information. Based on the visitor's decision, the robot
+        will either continue moving with the visitor or return to the "Roaming" state.
+
+        Args:
+            mystate (str): The current state.
+
+        Returns:
+            str: The next state, either "Moving with visitor" or "Roaming".
+        """
         print("State: Moving with visitor")
 
         #Load topic file
