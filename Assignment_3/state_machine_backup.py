@@ -3,7 +3,7 @@ from naoqi import ALProxy
 import time
 import keyboard
 
-robot_ip = "192.168.0.116"
+robot_ip = "192.168.0.105" # Robot internet address
 port = 9559  # Robot port number
 base_dir = "/home/nao/group_09/"
 
@@ -14,7 +14,8 @@ class StateMachine():
         self.base_dir = base_dir
         self.dialog_p = ALProxy('ALDialog', self.robot_ip, self.port)
         self.memory_p = ALProxy('ALMemory', self.robot_ip, self.port)
-        nao.InitProxy(IP=self.robot_ip, proxy=[1,2,3,9], PORT = self.port)        
+        # nao.InitProxy(IP=self.robot_ip, proxy=[1,2,3,5,9], PORT = self.port)  
+        nao.InitProxy(IP=self.robot_ip)      
         self.dialog_p.setLanguage("English")
         self.topics = []
         self.gestures = nao.GetAvailableGestures()
@@ -60,18 +61,43 @@ class StateMachine():
 
     def StateDetectedVisitor(self, mystate):
         print("State: Detected visitor")
+    
+        face_detected, timestamp, location = nao.DetectFace() # Face detecting
+        time.sleep(1)
+ 
+        waiting = True
+        activate_hello = True
+        start_time = time.time()    
+        while waiting:
+            if (time.time() - start_time) > 4:
+                waiting = False
+            elif (time.time() - start_time) > 2:
+                if face_detected:
+                    if activate_hello:
+                        nao.Say("Hello!")
+                        activate_hello = False
+                    nao.EyeLED([0,0,255])           # For now the eyes will light up
+ 
+        #If a face is still detected, move to interacting state
+        if not face_detected:
+            face_detected, timestamp, location = nao.DetectFace()
+        time.sleep(2)
 
-        topf_path = base_dir + "greeting_enu.top"
-        topic = self.ActivateTopic(topf_path)
-
-
-        self.DeactivateTopic(topic)
-        return "Roaming"
+        if face_detected:
+            print("Interacting ")
+            nao.EyeLED([0,0,255])
+            
+            return "Interacting"
+        else:
+            nao.EyeLED([255,255,255])
+            # self.DeactivateTopic(topic)
+            return "Roaming"
  
 
     def StateInteracting(self, mystate):
         print("State: Interacting with visitor")
 
+        #Load topic file
         topf_path = base_dir + "PracticalQuestion_enu.top"
         topic = self.ActivateTopic(topf_path)
         
@@ -86,10 +112,10 @@ class StateMachine():
         self.memory_p.insertData('Nod','0')
         print(self.memory_p.getData('Move'))
 
-        start = time.time()
-
-        while str(moving_trigerred) == '0':# and (time.time() - start) < 10:
+        # Stay in while loop until next state is triggered
+        while str(moving_trigerred) == '0':
             try:
+                #Check for trigger variables in memory
                 moving_trigerred = self.memory_p.getData('Move')
                 time_gesture = self.memory_p.getData('Time')
                 bathroom_gesture = self.memory_p.getData('Bathroom')
@@ -122,11 +148,9 @@ class StateMachine():
 
 
             # Needed to avoid double animations
-            # moving_trigerred = 0
             time_gesture = 0
             bathroom_gesture = 0
             nod_gesture = 0
-            # self.memory_p.insertData('Move','0')
             self.memory_p.insertData('Time','0')
             self.memory_p.insertData('Bathroom','0')
             self.memory_p.insertData('Nod','0')
@@ -143,22 +167,26 @@ class StateMachine():
     def StateMovingVisitor(self, mystate):
         print("State: Moving with visitor")
 
+        #Load topic file
         topf_path = base_dir + "Painting_enu.top"
         topic = self.ActivateTopic(topf_path)
 
         #Introduce topic:
-        nao.Say("What painting do you want information on?", POST=False)
+        nao.Say("What painting do you want information on? The one on Van Gogh or the one on PSV?   ", POST=False)
 
         start = time.time()
 
+        #Set triggers to zero
         painting_trigerred = 0
         self.memory_p.insertData('Painting','0')
         print(self.memory_p.getData('Painting'))
 
+        # Stay in while until painting is mentioned
         while str(painting_trigerred) == "0":
             #Update states
             try:
                 painting_trigerred = self.memory_p.getData("Painting")
+                print(painting_trigerred)
             except:
                 painting_trigerred = 0
             time.sleep(0.5)  # Check every 500 ms 
@@ -174,7 +202,10 @@ class StateMachine():
             topic = self.ActivateTopic(topf_path_psv)
 
             #Start topic:
-            nao.Say("On May 25, 1988, PSV won the European Cup I in Stuttgart after a thrilling final against Benfica, which was decided by penalties. Goalkeeper Hans van Breukelen played the heros role by saving the final penalty from Antonio Veloso, securing PSV their first European Cup victory in the clubs history. Do you want more information on the painting or would you like to continue?")
+            # nao.Say("On May 25, 1988, PSV won the European Cup I in Stuttgart after a thrilling final against Benfica, which was decided by penalties. Goalkeeper Hans van Breukelen played the heros role by saving the final penalty from Antonio Veloso, securing PSV their first European Cup victory in the clubs history. Do you want more information on the painting or would you like to continue?")
+            nao.Say("Here you can see a painting of the European journey of PSV. The 1988 PSV European journey was rocky. PSV won the quarter and semi finals on away goals against Bordeaux and Real Mardrid. In Suttgart it faced Benfica in the finale. After extra time there were still no goals scored which led to penalties. The penalty phase was tense but Van Breukelen stopped Benfica's 6th penalty causing PSV to win the European Cup One, which is the Champions League today.")
+            # nao.RunMovement('PSV.py')
+
 
         elif str(painting_trigerred).lower() == "van_gogh":
             #TODO: movement
@@ -182,7 +213,9 @@ class StateMachine():
             topic = self.ActivateTopic(topf_path_vangogh)
 
             #Start topic
-            nao.Say("What you see here is the painting The Starry Night by VIncent van Gogh. The starruy night, painted in 1889, is one of his most renowned works. The painting depicts a swirling night sky filled with vibrant, expressive stars above a quiet village. Do you want more information on the painting or would you like to continue?")
+            nao.Say("What you see here is the painting The Starry Night by Vincent van Gogh. The starry night, painted in 1889, is one of his most renowned works. The painting depicts a swirling night sky filled with vibrant, expressive stars above a quiet village. Do you want more information on the painting or would you like to continue?")
+            nao.RunMovement('vanGogh.py')
+
             # nao.Say("Yeah")
         else:
             print("We don't have that painting")
@@ -212,7 +245,7 @@ class StateMachine():
     # Main
     def main(self):
         # Initial state
-        state = "Interacting"
+        state = "Detected visitor"
 
         while True:
             # Check if 'q' key is pressed
