@@ -63,7 +63,7 @@ class StateMachine():
         print("State: Detected visitor")
     
         face_detected, timestamp, location = nao.DetectFace() # Face detecting
-        time.sleep(1)
+        time.sleep(3)
  
         waiting = True
         activate_hello = True
@@ -86,7 +86,7 @@ class StateMachine():
         if face_detected:
             print("Interacting ")
             nao.EyeLED([0,0,255])
-            
+
             return "Interacting"
         else:
             nao.EyeLED([255,255,255])
@@ -203,8 +203,7 @@ class StateMachine():
 
             #Start topic:
             # nao.Say("On May 25, 1988, PSV won the European Cup I in Stuttgart after a thrilling final against Benfica, which was decided by penalties. Goalkeeper Hans van Breukelen played the heros role by saving the final penalty from Antonio Veloso, securing PSV their first European Cup victory in the clubs history. Do you want more information on the painting or would you like to continue?")
-            nao.Say("Here you can see a painting of the European journey of PSV. The 1988 PSV European journey was rocky. PSV won the quarter and semi finals on away goals against Bordeaux and Real Mardrid. In Suttgart it faced Benfica in the finale. After extra time there were still no goals scored which led to penalties. The penalty phase was tense but Van Breukelen stopped Benfica's 6th penalty causing PSV to win the European Cup One, which is the Champions League today.")
-            # nao.RunMovement('PSV.py')
+            nao.Say("What you see here is a paining about the European Journey of PSV. PSV won the semi finals against Real Mardrid and in Stuttgart, they faced Benfica in the finale. After extra time there were still no goals scored, which led to penalties. The penalty phase was tense but Van Breukelen stopped Benficas 6th penalty causing PSV to win the European Cup! Do you want more information on the painting or would you like to continue?")            # nao.RunMovement('PSV.py')
 
 
         elif str(painting_trigerred).lower() == "van_gogh":
@@ -245,7 +244,7 @@ class StateMachine():
     # Main
     def main(self):
         # Initial state
-        state = "Detected visitor"
+        state = "Interacting"
 
         while True:
             # Check if 'q' key is pressed
