@@ -271,9 +271,11 @@ class StateMachine():
         topic = self.ActivateTopic(topf_path)
 
         #Introduce topic:
-        nao.Say("What painting do you want information on? The one on Van Gogh or the one on PSV?   ", POST=False)
-
-        start = time.time()
+        nao.Say("What painting do you want information on? The one on PSV?   ", POST=False)
+        nao.RunMovement('Right_hand.py')
+        time.sleep(4)
+        nao.Say("Or the one on Van Gogh?   ", POST=False)
+        nao.RunMovement('Left_hand.py')
 
         #Set triggers to zero
         painting_trigerred = 0
@@ -303,7 +305,7 @@ class StateMachine():
             #Start topic:
             # nao.Say("On May 25, 1988, PSV won the European Cup I in Stuttgart after a thrilling final against Benfica, which was decided by penalties. Goalkeeper Hans van Breukelen played the heros role by saving the final penalty from Antonio Veloso, securing PSV their first European Cup victory in the clubs history. Do you want more information on the painting or would you like to continue?")
             nao.Say("What you see here is a paining about the European Journey of PSV. PSV won the semi finals against Real Mardrid and in Stuttgart, they faced Benfica in the finale. After extra time there were still no goals scored, which led to penalties. The penalty phase was tense but Van Breukelen stopped Benficas 6th penalty causing PSV to win the European Cup! Do you want more information on the painting or would you like to continue?")            # nao.RunMovement('PSV.py')
-
+            
 
         elif str(painting_trigerred).lower() == "van_gogh":
             #TODO: movement
