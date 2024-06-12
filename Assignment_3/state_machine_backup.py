@@ -39,6 +39,7 @@ class StateMachine():
         self.dialog_p.setLanguage("English")
         self.topics = []
         self.gestures = nao.GetAvailableGestures()
+        nao.ALTrack(1)
         print("Setup the robot")
 
     def ActivateTopic(self, topf_path, module_name='MyModule'):
@@ -315,8 +316,6 @@ class StateMachine():
             #Start topic
             nao.Say("What you see here is the painting The Starry Night by Vincent van Gogh. The starry night, painted in 1889, is one of his most renowned works. The painting depicts a swirling night sky filled with vibrant, expressive stars above a quiet village. Do you want more information on the painting or would you like to continue?")
             nao.RunMovement('vanGogh.py')
-
-            # nao.Say("Yeah")
         else:
             print("We don't have that painting")
             return "Roaming"
@@ -333,11 +332,15 @@ class StateMachine():
                 new_painting_trigerred = "-"
             time.sleep(0.5)  # Check every 500 ms
 
-        print("Decision:" + str(new_painting_trigerred))
+        print("Decision: " + str(new_painting_trigerred))
         self.DeactivateTopic(topic)
         if str(new_painting_trigerred).lower() == "yes":
             return "Moving with visitor"
-        else:
+        elif str(new_painting_trigerred).lower() == "practical_question":
+            nao.Say("Of course, what is your question?")
+            time.sleep(2)
+            return "Interacting"
+        else:  #Case: decision=no
             nao.Say("Thank you for listening, have a nice visit in the museum!")
             time.sleep(2)
             return "Roaming"
