@@ -253,6 +253,8 @@ class StateMachine():
         if str(moving_trigerred) == '1':
             return "Moving with visitor"
         else:
+            nao.Say("Thank you for listening, have a nice visit in the museum!")
+            time.sleep(2)
             return "Roaming"
 
     def StateMovingVisitor(self, mystate):
