@@ -195,19 +195,27 @@ class StateMachine():
         self.memory_p.insertData('Nod','0')
         print(self.memory_p.getData('Move'))
 
+        #Start timer:
+        start_time = time.time()
+
         # Stay in while loop until next state is triggered
-        while str(moving_trigerred) == '0':
+        while str(moving_trigerred) == '0' and (time.time()-start_time) < 20:
             try:
                 #Check for trigger variables in memory
                 moving_trigerred = self.memory_p.getData('Move')
                 time_gesture = self.memory_p.getData('Time')
                 bathroom_gesture = self.memory_p.getData('Bathroom')
                 nod_gesture = self.memory_p.getData('Nod')
+                sound_detected, timestamp, soundInfo = nao.DetectSound()
             except:
                 moving_trigerred = 0
                 time_gesture = 0
                 bathroom_gesture = 0
                 nod_gesture = 0
+
+            #If still interacting, reset timer:
+            if sound_detected:
+                start_time = time.time()
 
             #If triggered, run gestures
             if str(time_gesture) == '1':
