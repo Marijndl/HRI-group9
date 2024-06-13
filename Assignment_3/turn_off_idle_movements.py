@@ -1,6 +1,6 @@
 import nao_nocv_2_1 as nao
 
-nao_ip = "192.168.0.116" #Bender
+nao_ip = "192.168.0.105" #Bender
 #nao_ip = "192.168.0.115" #Marvin
 port = 9559
 

@@ -34,8 +34,9 @@ class StateMachine():
         self.base_dir = base_dir
         self.dialog_p = ALProxy('ALDialog', self.robot_ip, self.port)
         self.memory_p = ALProxy('ALMemory', self.robot_ip, self.port)
-        nao.InitProxy(IP=self.robot_ip, proxy=[1,2,3,5,7,9], PORT = self.port)  
-        # nao.InitProxy(IP=self.robot_ip)      
+
+        # nao.InitProxy(IP=self.robot_ip, proxy=[1,2,3,5,7,9], PORT = self.port)  
+        nao.InitProxy(IP=self.robot_ip)      
         self.dialog_p.setLanguage("English")
         self.topics = []
         self.gestures = nao.GetAvailableGestures()
@@ -235,8 +236,6 @@ class StateMachine():
                 self.memory_p.insertData('Nod','0')
                 nao.RunMovement('Nod.py')
                 time.sleep(5)
-                print(nod_gesture) 
-
 
             # Needed to avoid double animations
             time_gesture = 0
@@ -298,12 +297,10 @@ class StateMachine():
             #Update states
             try:
                 painting_trigerred = self.memory_p.getData("Painting")
-                print(painting_trigerred)
             except:
                 painting_trigerred = 0
             time.sleep(0.5)  # Check every 500 ms 
         
-        print(painting_trigerred)
         time.sleep(2)
         self.DeactivateTopic(topic)
 
@@ -400,8 +397,9 @@ class StateMachine():
             None
         """
         # Initial state
-        state = "Interacting"
-
+        # state = "Detected visitor"
+        state = "Moving with visitor"
+        
         while True:
             # Check if 'q' key is pressed
             if keyboard.is_pressed('q'):
