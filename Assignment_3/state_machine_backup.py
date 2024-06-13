@@ -34,12 +34,12 @@ class StateMachine():
         self.base_dir = base_dir
         self.dialog_p = ALProxy('ALDialog', self.robot_ip, self.port)
         self.memory_p = ALProxy('ALMemory', self.robot_ip, self.port)
-        # nao.InitProxy(IP=self.robot_ip, proxy=[1,2,3,5,9], PORT = self.port)  
-        nao.InitProxy(IP=self.robot_ip)      
+        nao.InitProxy(IP=self.robot_ip, proxy=[1,2,3,5,7,9], PORT = self.port)  
+        # nao.InitProxy(IP=self.robot_ip)      
         self.dialog_p.setLanguage("English")
         self.topics = []
         self.gestures = nao.GetAvailableGestures()
-        nao.ALTrack(1)
+        # nao.ALTrack(1)
         print("Setup the robot")
 
     def ActivateTopic(self, topf_path, module_name='MyModule'):
@@ -193,13 +193,13 @@ class StateMachine():
         self.memory_p.insertData('Time','0')
         self.memory_p.insertData('Bathroom','0')
         self.memory_p.insertData('Nod','0')
-        print(self.memory_p.getData('Move'))
 
         #Start timer:
         start_time = time.time()
+        sound_detected = False
 
         # Stay in while loop until next state is triggered
-        while str(moving_trigerred) == '0' and (time.time()-start_time) < 20:
+        while str(moving_trigerred) == '0':# and (time.time()-start_time) < 20:
             try:
                 #Check for trigger variables in memory
                 moving_trigerred = self.memory_p.getData('Move')
@@ -284,14 +284,14 @@ class StateMachine():
         #Introduce topic:
         nao.Say("What painting do you want information on? The one on PSV?   ", POST=False)
         nao.RunMovement('Right_hand.py')
-        time.sleep(4)
-        nao.Say("Or the one on Van Gogh?   ", POST=False)
+        time.sleep(1)
         nao.RunMovement('Left_hand.py')
+        nao.Say("Or the one on Van Gogh?   ", POST=False)
+        
 
         #Set triggers to zero
         painting_trigerred = 0
         self.memory_p.insertData('Painting','0')
-        print(self.memory_p.getData('Painting'))
 
         # Stay in while until painting is mentioned
         while str(painting_trigerred) == "0":
@@ -316,7 +316,7 @@ class StateMachine():
             #Start topic:
             # nao.Say("On May 25, 1988, PSV won the European Cup I in Stuttgart after a thrilling final against Benfica, which was decided by penalties. Goalkeeper Hans van Breukelen played the heros role by saving the final penalty from Antonio Veloso, securing PSV their first European Cup victory in the clubs history. Do you want more information on the painting or would you like to continue?")
             nao.Say("What you see here is a paining about the European Journey of PSV. PSV won the semi finals against Real Mardrid and in Stuttgart, they faced Benfica in the finale. After extra time there were still no goals scored, which led to penalties. The penalty phase was tense but Van Breukelen stopped Benficas 6th penalty causing PSV to win the European Cup! Do you want more information on the painting or would you like to continue?")            # nao.RunMovement('PSV.py')
-            
+            nao.RunMovement('psv1.py')        
 
         elif str(painting_trigerred).lower() == "van_gogh":
             #TODO: movement
@@ -325,21 +325,38 @@ class StateMachine():
 
             #Start topic
             nao.Say("What you see here is the painting The Starry Night by Vincent van Gogh. The starry night, painted in 1889, is one of his most renowned works. The painting depicts a swirling night sky filled with vibrant, expressive stars above a quiet village. Do you want more information on the painting or would you like to continue?")
-            nao.RunMovement('vanGogh.py')
+            nao.RunMovement('vangogh1.py')
         else:
             print("We don't have that painting")
             return "Roaming"
 
         new_painting_trigerred = "-"
+        gesture_trigerred = 0
         self.memory_p.insertData('Decision','-')
-        print(self.memory_p.getData('Decision'))
+        self.memory_p.insertData('Painting_gesture', '0')
 
         while str(new_painting_trigerred).lower() == "-":
             #Update states
             try:
                 new_painting_trigerred = self.memory_p.getData("Decision")
+                gesture_trigerred = self.memory_p.getData("Painting_gesture")
             except:
                 new_painting_trigerred = "-"
+                gesture_trigerred = 0
+            
+            #Run secondary gestures when triggered.
+            if str(gesture_trigerred).lower() == 'psv_gesture':
+                nao.RunMovement('psv2.py')
+                time.sleep(2)
+
+            elif str(gesture_trigerred).lower() == 'vg_gesture':
+                nao.RunMovement('vangogh2.py')
+                time.sleep(2)
+
+            # Needed to avoid double animations
+            gesture_trigerred = 0
+            self.memory_p.insertData('Painting_gesture', '0')           
+
             time.sleep(0.5)  # Check every 500 ms
 
         print("Decision: " + str(new_painting_trigerred))
@@ -383,7 +400,7 @@ class StateMachine():
             None
         """
         # Initial state
-        state = "Detected visitor"
+        state = "Interacting"
 
         while True:
             # Check if 'q' key is pressed
