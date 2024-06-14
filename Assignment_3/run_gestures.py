@@ -8,12 +8,10 @@ nao.Say("I am happy")
 time.sleep(3)
 
 nao.RunMovement("CheckTime.py", post = False)
-nao.RunMovement("Bathroom.py", post = False)
-nao.RunMovement('Nod.py', post = False)
-nao.RunMovement('Right_hand.py', post = False)
-nao.RunMovement('Left_hand.py', post = False)
-nao.RunMovement('psv1.py', post = False)
-nao.RunMovement('psv2.py', post = False)
-nao.RunMovement('vangogh1.py', post = False)
-nao.RunMovement('vangogh2.py', post = False)
+time.sleep(1)
 
+nao.RunMovement('vangogh1.py', post = False)
+time.sleep(1)
+
+nao.RunMovement('psv1.py', post = False)
+time.sleep(1)

@@ -222,19 +222,19 @@ class StateMachine():
             if str(time_gesture) == '1':
                 time_gesture = 0
                 self.memory_p.insertData('Time','0')
-                nao.RunMovement('CheckTime.py')
+                nao.RunMovement('CheckTime.py', post = False)
                 time.sleep(5)
 
             elif str(bathroom_gesture) == '1':
                 bathroom_gesture = 0
                 self.memory_p.insertData('Bathroom','0')
-                nao.RunMovement('Bathroom.py')
+                nao.RunMovement('Bathroom.py', post = False)
                 time.sleep(5)
             
             elif str(nod_gesture) == '1':
                 nod_gesture = 0
                 self.memory_p.insertData('Nod','0')
-                nao.RunMovement('Nod.py')
+                nao.RunMovement('Nod.py', post = False)
                 time.sleep(5)
 
             # Needed to avoid double animations
@@ -282,10 +282,10 @@ class StateMachine():
 
         #Introduce topic:
         nao.Say("What painting do you want information on? The one on PSV?   ", POST=False)
-        nao.RunMovement('Right_hand.py')
+        nao.RunMovement('Right_hand.py', post = False)
         time.sleep(1)
-        nao.RunMovement('Left_hand.py')
         nao.Say("Or the one on Van Gogh?   ", POST=False)
+        nao.RunMovement('Left_hand.py', post = False)
         
 
         #Set triggers to zero
@@ -312,8 +312,8 @@ class StateMachine():
 
             #Start topic:
             # nao.Say("On May 25, 1988, PSV won the European Cup I in Stuttgart after a thrilling final against Benfica, which was decided by penalties. Goalkeeper Hans van Breukelen played the heros role by saving the final penalty from Antonio Veloso, securing PSV their first European Cup victory in the clubs history. Do you want more information on the painting or would you like to continue?")
-            nao.Say("What you see here is a paining about the European Journey of PSV. PSV won the semi finals against Real Mardrid and in Stuttgart, they faced Benfica in the finale. After extra time there were still no goals scored, which led to penalties. The penalty phase was tense but Van Breukelen stopped Benficas 6th penalty causing PSV to win the European Cup! Do you want more information on the painting or would you like to continue?")            # nao.RunMovement('PSV.py')
-            nao.RunMovement('psv1.py')        
+            nao.Say("What you see here is a paining about the European Journey of PSV. PSV won the semi finals against Real Mardrid and in Stuttgart, they faced Benfica in the finale. After extra time there were still no goals scored, which led to penalties. The penalty phase was tense but Van Breukelen stopped Benficas 6th penalty causing PSV to win the European Cup! Do you want more information on the painting or would you like to continue?")         
+            nao.RunMovement('psv1.py', post = False)        
 
         elif str(painting_trigerred).lower() == "van_gogh":
             #TODO: movement
@@ -322,7 +322,7 @@ class StateMachine():
 
             #Start topic
             nao.Say("What you see here is the painting The Starry Night by Vincent van Gogh. The starry night, painted in 1889, is one of his most renowned works. The painting depicts a swirling night sky filled with vibrant, expressive stars above a quiet village. Do you want more information on the painting or would you like to continue?")
-            nao.RunMovement('vangogh1.py')
+            nao.RunMovement('vangogh1.py', post = False)
         else:
             print("We don't have that painting")
             return "Roaming"
@@ -343,11 +343,11 @@ class StateMachine():
             
             #Run secondary gestures when triggered.
             if str(gesture_trigerred).lower() == 'psv_gesture':
-                nao.RunMovement('psv2.py')
+                nao.RunMovement('psv2.py, post = False')
                 time.sleep(2)
 
             elif str(gesture_trigerred).lower() == 'vg_gesture':
-                nao.RunMovement('vangogh2.py')
+                nao.RunMovement('vangogh2.py', post = False)
                 time.sleep(2)
 
             # Needed to avoid double animations
@@ -397,8 +397,8 @@ class StateMachine():
             None
         """
         # Initial state
-        # state = "Detected visitor"
-        state = "Moving with visitor"
+        state = "Detected visitor"
+        # state = "Moving with visitor"
         
         while True:
             # Check if 'q' key is pressed
