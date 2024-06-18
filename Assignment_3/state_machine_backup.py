@@ -31,25 +31,27 @@ class StateMachine():
         """
         self.robot_ip = robot_ip
         self.port = port
-        self.base_dir = base_dir
-        self.dialog_p = ALProxy('ALDialog', self.robot_ip, self.port)
-        self.memory_p = ALProxy('ALMemory', self.robot_ip, self.port)
+        self.base_dir = base_dir       
 
         # nao.InitProxy(IP=self.robot_ip, proxy=[1,2,3,5,7,9], PORT = self.port)  
-        nao.InitProxy(IP=self.robot_ip)      
+        nao.InitProxy(IP=self.robot_ip)
+
+        #Init later to prevent script problems      
+        self.dialog_p = ALProxy('ALDialog', self.robot_ip, self.port)
+        self.memory_p = ALProxy('ALMemory', self.robot_ip, self.port)
         self.dialog_p.setLanguage("English")
         self.topics = []
         self.gestures = nao.GetAvailableGestures()
         # nao.ALTrack(1)
         print("Setup the robot")
 
-    def ActivateTopic(self, topf_path, module_name='MyModule'):
+    def ActivateTopic(self, topf_path, module_name='myModule'):
         """
         Activates a dialog topic.
 
         Args:
             topf_path (str): Path to the topic file.
-            module_name (str): Name of the module. Default is 'MyModule'.
+            module_name (str): Name of the module. Default is 'myModule'.
 
         Returns:
             str: The loaded topic.
@@ -70,13 +72,13 @@ class StateMachine():
 
         return topic
 
-    def DeactivateTopic(self, topic, module_name='MyModule'):
+    def DeactivateTopic(self, topic, module_name='myModule'):
         """
         Deactivates a dialog topic.
 
         Args:
             topic (str): The topic to deactivate.
-            module_name (str): Name of the module. Default is 'MyModule'.
+            module_name (str): Name of the module. Default is 'myModule'.
         """
         # Deactivate topic
         self.dialog_p.deactivateTopic(topic)
