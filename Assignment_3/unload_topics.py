@@ -3,7 +3,7 @@ from naoqi import ALProxy
 import time
 import keyboard
 
-robot_ip = "192.168.0.105" # Robot internet address
+robot_ip = "192.168.0.116" # Robot internet address
 port = 9559  # Robot port number
 base_dir = "/home/nao/group_09/"
 

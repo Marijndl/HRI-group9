@@ -3,7 +3,7 @@ from naoqi import ALProxy
 import time
 import keyboard
 
-robot_ip = "192.168.0.105" # Robot internet address
+robot_ip = "192.168.0.119" # Robot internet address
 port = 9559  # Robot port number
 base_dir = "/home/nao/group_09/"
 
@@ -57,9 +57,11 @@ class StateMachine():
         # Load topic - absolute path is required
         topf_path = topf_path.decode('utf-8')
         topic = self.dialog_p.loadTopic(topf_path.encode('utf-8'))
+        print(topic)
 
         # Start dialog
         self.dialog_p.subscribe(module_name)
+        print("subs")
 
         # Activate dialog
         self.dialog_p.activateTopic(topic)
@@ -398,6 +400,8 @@ class StateMachine():
         """
         # Initial state
         state = "Detected visitor"
+        # state = "Interacting"
+        
         # state = "Moving with visitor"
         
         while True:

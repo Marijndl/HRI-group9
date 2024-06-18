@@ -1,7 +1,7 @@
 import nao_nocv_2_1 as nao
 import time
 
-nao.InitProxy(IP="192.168.0.105")
+nao.InitProxy(IP="192.168.0.116")
 nao.InitPose()
 nao.Say("I am happy")
 
