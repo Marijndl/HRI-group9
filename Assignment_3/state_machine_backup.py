@@ -402,9 +402,6 @@ class StateMachine():
         """
         # Initial state
         state = "Detected visitor"
-        # state = "Interacting"
-        
-        # state = "Moving with visitor"
         
         while True:
             # Check if 'q' key is pressed
